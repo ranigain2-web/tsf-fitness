@@ -15,3 +15,9 @@ agent-state/
 .DS_Store
 .idea/
 .vscode/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

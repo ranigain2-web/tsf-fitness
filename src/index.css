@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* App shell lives on Tailwind utilities; this file only carries the
+   document-level defaults that utilities do not express. */
+:root {
+  color-scheme: light dark;
+}
