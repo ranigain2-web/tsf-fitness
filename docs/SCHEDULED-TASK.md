@@ -1,24 +1,25 @@
-# Scheduled Task Setup — Paste-Ready
+# Scheduled Tasks — ARMED
 
-The agent session cannot create platform scheduled tasks itself (the
-scheduling tool was unavailable on Day 0). The **owner** creates the two
-daily tasks in the Z.ai scheduled-tasks UI. Everything else is already
-armed: repository, bootstrap, protocol, CI.
+Both daily tasks were created by the agent on Day 0 (the platform
+scheduler accepted them on retry). This document records their
+configuration so the owner can inspect, manually trigger, or recreate
+them at any time.
 
-## Create these two tasks (copy-paste)
+## Live tasks
 
 | | Task 1 — Primary | Task 2 — Checkpoint |
 |---|---|---|
 | Name | TSF Marathon - Primary 0130 IST | TSF Marathon - Checkpoint 0830 IST |
-| Schedule | Daily at **01:30** (Asia/Calcutta) | Daily at **08:30** (Asia/Calcutta) |
-| Priority | Highest available | Highest available |
-| Message | see below (same for both) | see below (same for both) |
+| Platform job ID | 540076 | 540077 |
+| Schedule | Daily **01:30** Asia/Calcutta (cron `0 30 1 * * ?`) | Daily **08:30** Asia/Calcutta (cron `0 30 8 * * ?`) |
+| Priority | Highest (15) | Highest (15) |
+| Message | identical for both — see below | identical for both — see below |
 
 The checkpoint task is idempotent: if the primary run already completed
-today, it exits after one line (PROTOCOL.md §1.3). Both tasks use the
+today, it exits after one line (PROTOCOL.md §1.3). Both tasks send the
 identical message.
 
-## The message (paste verbatim into both tasks)
+## The message both tasks send (verbatim)
 
 ```text
 TSF Fitness marathon daily cycle. Execute now:
@@ -58,5 +59,11 @@ blocks compliance, record why in RUN-LOG.md and stop.
 ## Manual trigger (works anytime)
 
 Sending the same message manually in the marathon chat session runs one
-cycle immediately — useful for a supervised Day 1 or whenever you want to
-watch a run live.
+cycle immediately — useful for a supervised run or whenever you want to
+watch one live.
+
+## If a task ever disappears
+
+Recreate it in the Z.ai scheduled-tasks UI with the name, schedule and
+message above (the free plan allows three daily tasks; the marathon uses
+two).

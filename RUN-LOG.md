@@ -28,14 +28,15 @@ history.
   fully barred), ANALYSIS, RUN-LOG, DECISIONS, BLOCKED, README,
   docs/PRODUCT.md, docs/designs/SITEMAP.md, stub CI, MIT LICENSE,
   .gitignore. Pushed to main as the initial commit.
-- 14:5x — Platform scheduling tool unavailable in the agent session (two
-  attempts, rejected). Fallback deployed: paste-ready task spec committed
-  at docs/SCHEDULED-TASK.md; owner to create the two daily tasks
-  (01:30 + 08:30 IST) in the Z.ai UI with that message. Until then, the
-  same message sent manually in the chat runs a cycle on demand.
-- Day 0 verification: fresh clone from the remote renders the framework;
-  public unauthenticated clone works; no credential anywhere in the repo
-  (scanned); CI stub green on main.
+- 16:2x — Scheduler became available on retry in a later turn: BOTH daily
+  tasks created by the agent — primary 01:30 IST (job 540076) and
+  checkpoint 08:30 IST (job 540077), Asia/Calcutta, highest priority,
+  identical cycle message. docs/SCHEDULED-TASK.md records their config.
+- 16:2x — Full Day 0 audit passed: bootstrap re-run end-to-end (fresh
+  clone of main OK); all 15 framework files present on remote; CI green
+  on both commits; no credential anywhere in the repo (re-scanned after
+  clone); external links in BACKLOG.md verified live; agent-state
+  permissions correct (remote.txt mode 600).
 
 **State for next run:** start TSF-001 (walking skeleton). Everything else
 in BACKLOG.md is TODO. No open ESCALATE items.
