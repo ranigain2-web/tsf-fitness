@@ -39,7 +39,10 @@ npm run typecheck  # tsc -b
 Installability and offline behavior are enforced by CI: Playwright loads
 the production build, waits for the service worker to control the page,
 verifies the precache, then reloads with the network cut and asserts the
-shell still renders.
+shell still renders (styled, not just present).
+
+Icon regeneration (optional, dev-only): `pip install -r
+requirements-dev.txt && python3 scripts/gen_icons.py`.
 
 ## The operating framework
 

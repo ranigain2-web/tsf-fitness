@@ -36,6 +36,9 @@ jobs:
       - run: npm run build
 
   e2e:
+    concurrency:
+      group: e2e-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -105,19 +108,26 @@ jobs:
       - name: Lighthouse against the deployed app (informational)
         # Lighthouse 12.0.0 removed the PWA category (PR #15455), so
         # installability here is proven by the blocking Playwright step
-        # above; this report is recorded for trend-watching only.
+        # above; this report is recorded for trend-watching only. The
+        # step is non-blocking by policy, but it must SHOW what happened:
+        # scores print to the log and a missing report is stated, never
+        # silently swallowed.
         continue-on-error: true
         run: |
           mkdir -p lighthouse-report
           npx lighthouse "$E2E_BASE_URL" \
-            --chrome-flags="--headless=new" \
             --output=json --output=html \
             --output-path=/tmp/lighthouse/live
-          cp /tmp/lighthouse/live*.report.* lighthouse-report/ || true
+          if [ -f /tmp/lighthouse/live.report.json ]; then
+            cp /tmp/lighthouse/live.report.* lighthouse-report/
+            node -e "const r=require('/tmp/lighthouse/live.report.json'); const c=r.categories; console.log('Lighthouse:', JSON.stringify(Object.fromEntries(Object.entries(c).map(([k,v])=>[k,Math.round(v.score*100)]))))"
+          else
+            echo "lighthouse did not produce a report (recorded as missing; non-blocking)"
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-report
           path: lighthouse-report/
-          if-no-files-found: ignore
+          if-no-files-found: warn
           retention-days: 7

@@ -72,20 +72,36 @@ test('service worker precaches the shell', async ({ page }) => {
   // The generated Workbox worker precaches everything the shell needs
   // offline: revisioned files (manifest, HTML, favicon, all icons) plus
   // hashed JS/CSS assets. The floor guards against gross loss while the
-  // member assertions pin the load-bearing entries.
+  // member assertions pin every load-bearing entry: HTML, the manifest,
+  // JS, CSS (a styled page requires it), and an icon.
   expect(paths.length).toBeGreaterThanOrEqual(9)
   expect(paths).toContain('/tsf-fitness/index.html')
+  expect(paths).toContain('/tsf-fitness/manifest.webmanifest')
   expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.js'))).toBe(true)
+  expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.css'))).toBe(true)
   expect(paths.some((p) => p.endsWith('/icons/icon-192.png'))).toBe(true)
 })
+
+test.use({ colorScheme: 'light' })
 
 test('app reloads with the network fully offline', async ({ page }) => {
   await page.goto(APP_URL)
   await waitForServiceWorker(page)
 
   await page.context().setOffline(true)
-  await page.reload()
-  await expect(page.getByRole('heading', { level: 1, name: 'TSF Fitness' })).toBeVisible()
-  await expect(page.getByText('Train. Snap. Fuel.')).toBeVisible()
-  await page.context().setOffline(false)
+  try {
+    await page.reload()
+    await expect(page.getByRole('heading', { level: 1, name: 'TSF Fitness' })).toBeVisible()
+    await expect(page.getByText('Train. Snap. Fuel.')).toBeVisible()
+    // Styled, not merely rendered: the CSS bundle is served from the
+    // precache too, so the shell keeps its Tailwind background offline.
+    // (Tailwind v4 emits oklch colors; the literal pins slate-50.)
+    const bg = await page.evaluate(() => {
+      const main = document.querySelector('main')
+      return main ? getComputedStyle(main).backgroundColor : 'missing main'
+    })
+    expect(bg).toBe('oklch(0.984 0.003 247.858)') // Tailwind slate-50
+  } finally {
+    await page.context().setOffline(false)
+  }
 })

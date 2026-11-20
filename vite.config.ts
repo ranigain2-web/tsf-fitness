@@ -20,7 +20,7 @@ export default defineConfig({
         name: 'TSF Fitness',
         short_name: 'TSF',
         description:
-          'Local-first, camera-AI fitness coach. Train. Snap. Fuel. Everything stays on your device.',
+          'Local-first fitness coach PWA. Train. Snap. Fuel. Everything stays on your device.',
         start_url: '.',
         scope: '.',
         display: 'standalone',

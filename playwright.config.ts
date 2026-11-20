@@ -16,7 +16,6 @@ export default defineConfig({
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: liveBaseUrl ?? 'http://localhost:4173',
-    ...devices['Desktop Chrome'],
   },
   webServer: liveBaseUrl
     ? undefined
