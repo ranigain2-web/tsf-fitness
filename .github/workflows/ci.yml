@@ -103,8 +103,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Offline smoke against the deployed app
-        run: npx playwright test
+      - name: Locate Playwright Chromium for Lighthouse
+        # Lighthouse drives its own Chrome via chrome-launcher, which needs
+        # an explicit path (no system Chrome is guaranteed on runners).
+        # The same Chromium this job just installed for Playwright is the
+        # deterministic choice.
+        run: echo "CHROME_PATH=$(ls "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux*/chrome | sort | tail -n 1)" >> "$GITHUB_ENV"
+      - name: Offline smoke against the deployed app (with propagation retries)
+        # deploy-pages returns before every edge node has the new content;
+        # a brief 404/stale window must not redden the critical path.
+        # Five attempts, twenty seconds apart, cover it.
+        run: |
+          for i in 1 2 3 4 5; do
+            if npx playwright test; then exit 0; fi
+            echo "attempt $i failed; waiting for Pages propagation..."
+            sleep 20
+          done
+          echo "smoke failed against the deployed URL after 5 attempts"
+          exit 1
       - name: Lighthouse 13 trend report (informational)
         # Lighthouse 12.0.0 removed the PWA category (PR #15455), so
         # installability here is proven by the blocking Playwright step
@@ -117,6 +133,7 @@ jobs:
         run: |
           mkdir -p lighthouse-report
           npx lighthouse "$E2E_BASE_URL" \
+            --chrome-flags="--headless=new --no-sandbox --remote-allow-origins=*" \
             --output=json --output=html \
             --output-path=/tmp/lighthouse/live || true
           if [ -f /tmp/lighthouse/live.report.json ]; then
@@ -127,16 +144,22 @@ jobs:
           fi
       - name: Lighthouse 11 PWA category (blocking — the bar's literal measurement)
         # The bar names Lighthouse "Install to home screen" on the deployed
-        # URL. The PWA category was removed in Lighthouse 12.0.0; 11.9.0 is
-        # the last release carrying it, so the literal measurement runs
-        # pinned to that version and BLOCKS the merge pipeline.
+        # URL. The PWA category was removed in Lighthouse 12.0.0; 11.7.1 is
+        # the last release carrying it (the 11.x line ends there), so the
+        # literal measurement runs pinned to that version and BLOCKS the
+        # merge pipeline. Notes on the plumbing, all dry-run verified:
+        # Lighthouse 11's printer does NOT mkdir the output directory, and
+        # with a single --output plus an explicit --output-path it writes
+        # to that exact raw path (no .report.json suffix is appended).
         run: |
-          npx --yes lighthouse@11.9.0 "$E2E_BASE_URL" \
+          mkdir -p /tmp/lh11 lighthouse-report
+          npx --yes lighthouse@11.7.1 "$E2E_BASE_URL" \
             --only-categories=pwa \
+            --chrome-flags="--headless=new --no-sandbox --remote-allow-origins=*" \
             --output=json \
-            --output-path=/tmp/lh11/pwa
-          node -e "const r=require('/tmp/lh11/pwa.report.json'); console.log('Lighthouse 11 PWA score:', r.categories.pwa.score); process.exit(r.categories.pwa.score===1?0:1)"
+            --output-path=/tmp/lh11/pwa.report.json
           cp /tmp/lh11/pwa.report.json lighthouse-report/
+          node -e "const r=require('/tmp/lh11/pwa.report.json'); console.log('Lighthouse 11 PWA score:', r.categories.pwa.score); process.exit(r.categories.pwa.score===1?0:1)"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

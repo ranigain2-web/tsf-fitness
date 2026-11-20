@@ -17,10 +17,12 @@ BAR_3 = (251, 146, 60, 255)    # orange-400 (Fuel)
 
 
 def make_icon(size: int, rounded: bool, safe_zone: float) -> Image.Image:
-    img = Image.new("RGBA", (size, size), SLATE)
+    # Rounded icons start transparent so the corners are actually cut;
+    # maskable icons stay full-bleed squares (rounded would defeat the
+    # purpose — the launcher applies its own mask).
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0) if rounded else SLATE)
     d = ImageDraw.Draw(img)
-    if rounded:
-        d.rounded_rectangle([0, 0, size - 1, size - 1], radius=size // 5, fill=SLATE)
+    d.rounded_rectangle([0, 0, size - 1, size - 1], radius=size // 5, fill=SLATE)
     # Bars occupy the safe zone, centered, with equal gaps. The safe_zone
     # is more conservative than the 80% maskable guideline (0.60 vs 0.80),
     # keeping the mark clear of any rounded-corner clipping.

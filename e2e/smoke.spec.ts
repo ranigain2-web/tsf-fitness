@@ -79,10 +79,10 @@ test('service worker precaches the shell', async ({ page }) => {
 
   const paths = await precachePaths(page)
   // The generated Workbox worker precaches everything the shell needs
-  // offline — 10 unique URLs for this shell: HTML, webmanifest, favicon,
-  // 4 icons, 2 JS bundles, 1 CSS. The floor guards against gross loss
-  // while the member assertions pin every load-bearing entry.
-  expect(paths.length).toBeGreaterThanOrEqual(9)
+  // offline — exactly 10 unique URLs for this shell: HTML, webmanifest,
+  // favicon, 4 icons, 2 JS bundles, 1 CSS. Pinned exactly: precache bloat
+  // and loss both matter, so drift in either direction fails here.
+  expect(paths.length).toBe(10)
   expect(paths).toContain('/tsf-fitness/index.html')
   expect(paths).toContain('/tsf-fitness/manifest.webmanifest')
   expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.js'))).toBe(true)
