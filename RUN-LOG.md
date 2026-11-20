@@ -104,13 +104,18 @@ history.
 - 04:1x — CRITIC CAP REACHED (5/5 for TSF-001 today, §4). Per protocol:
   the item does NOT merge today — merge requires critic convergence and
   round 5 picked bar. The PR stays open with every finding fixed and the
-  literal measurement dry-run-proven. **RESUME POINTER for the next run
-  (tomorrow's primary or the 08:30 checkpoint if the cap applies to
-  today only): (1) re-run the full local gate if anything changed;
-  (2) run critic round 6 (fresh budget, day 2) on the full diff;
-  (3) merge PR #1 only after it converges AND CI is green; (4) confirm
-  the deployed-URL verification job goes green on main; (5) then proceed
-  to TSF-002. Do NOT start TSF-002 while TSF-001 is IN-PROGRESS.**
+  literal measurement dry-run-proven. **RESUME POINTER:**
+  * If you are the 08:30 IST CHECKPOINT on 2026-11-21: the daily critic
+    budget for TSF-001 is consumed (5/5). Do NOT run another critic round
+    today, do NOT merge, do NOT start TSF-002. Verify PR #1 is open with
+    green CI, then report one line in chat and exit.
+  * If you are the next day's PRIMARY run (2026-11-22, 01:30 IST):
+    (1) re-run the full local gate on the branch if anything changed;
+    (2) run critic round 6 (fresh day-2 budget) on the full diff;
+    (3) merge PR #1 only after it converges AND CI is green;
+    (4) confirm the deployed-URL verification jobs go green on main;
+    (5) mark TSF-001 DONE and proceed to TSF-002.
+    Do NOT start TSF-002 while TSF-001 is IN-PROGRESS.**
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
