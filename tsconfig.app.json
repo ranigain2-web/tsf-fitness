@@ -22,7 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    /* Local-first invariant: no Node/global assumptions in app code */
     "skipLibCheck": true
   },
   "include": ["src"]

@@ -18,7 +18,7 @@ critic. The full commit history is the build log.
 |---|---|
 | Day | 1 of 30 — walking skeleton (TSF-001) |
 | Current release | — (v0.1 expected Day 7) |
-| Live app | https://ranigain2-web.github.io/tsf-fitness/ (installable PWA, works offline) |
+| Live app | https://ranigain2-web.github.io/tsf-fitness/ — deployed from `main` by CI, then re-verified post-deploy (installability + offline smoke + Lighthouse run against the live URL) |
 
 ## Development
 

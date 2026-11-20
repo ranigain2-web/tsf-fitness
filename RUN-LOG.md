@@ -34,6 +34,22 @@ history.
   manifest installability, precache contents, and a reload with the
   network cut — 3/3 green locally against the production build; e2e job
   added to CI. Full local gate green (lint, typecheck, unit, build, e2e).
+- 02:3x — PR #1 opened. CI on PR green (ci + e2e). Pages enabled (API,
+  build_type=workflow).
+- 02:4x — Blind critic round 1 (fresh subagent: diff + bar only). PICK:
+  bar. It cloned the branch and reproduced every green check, then found
+  the real gap: the bar's deployed-URL measurements existed nowhere in
+  the diff (no Lighthouse, smoke targets localhost only). 2 BLOCKER,
+  3 MAJOR, 7 NIT. Resolutions: BLOCKERs + 5 NITs → PROPOSE FIX
+  (verify-deployed CI job: Playwright offline smoke against the live
+  Pages URL as the blocking measurement + informational Lighthouse run —
+  the PWA category was removed from Lighthouse 10+, documented; e2e
+  typechecking via tsconfig.e2e.json, negative-tested; e2e script builds
+  first; job-level concurrency; maskable-192 icon; --max-warnings 0;
+  two comment fixes). 3 NITs → DECLINE with reasons (push+PR duplicate
+  runs: the bar text requires CI on every push and PR; no artifact reuse:
+  sub-second build, coupling not worth it). README live-app line
+  reworded to the CI-deployed truth. Fixes pushed for round 2.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 

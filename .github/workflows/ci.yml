@@ -1,9 +1,14 @@
 name: CI
 
 # TSF-001: real toolchain replacing the Day 0 stub. Every push and PR runs
-# lint, typecheck, unit tests, and a production build. Pushes to main also
-# deploy the built app to GitHub Pages (Pages is configured with
-# build_type=workflow; this workflow is its only build source).
+# lint, typecheck, unit tests, and a production build, plus the Playwright
+# offline smoke on the production build. Pushes to main also deploy the
+# built app to GitHub Pages (Pages is configured with build_type=workflow;
+# this workflow is its only build source) and then re-run the installability
+# and offline checks against the DEPLOYED URL — the bar's measurement —
+# with Lighthouse recorded alongside (the Lighthouse PWA category no longer
+# exists in Lighthouse 10+; the Playwright offline checks are the blocking
+# measurement, the Lighthouse run is informational).
 
 on:
   push:
@@ -12,12 +17,11 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   ci:
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,8 +45,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npx playwright test
+      - run: npm run e2e
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -77,3 +80,40 @@ jobs:
           path: dist
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  verify-deployed:
+    # The bar's measurement, run against the live deployment after it
+    # lands: the offline smoke suite must pass on the deployed URL, and a
+    # Lighthouse report is recorded (non-blocking; the PWA category was
+    # removed from Lighthouse in v10, so installability here is proven by
+    # the Playwright manifest + offline assertions).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    env:
+      E2E_BASE_URL: https://ranigain2-web.github.io/tsf-fitness/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Offline smoke against the deployed app
+        run: npx playwright test
+      - name: Lighthouse against the deployed app (informational)
+        continue-on-error: true
+        run: |
+          npx lighthouse "$E2E_BASE_URL" \
+            --chrome-flags="--headless=new" \
+            --output=json --output=html \
+            --output-path=/tmp/lighthouse/live
+          mkdir -p lighthouse-report
+          cp /tmp/lighthouse/live*.report.* lighthouse-report/ 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: lighthouse-report/
+          retention-days: 7
