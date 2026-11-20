@@ -1,26 +1,60 @@
 name: CI
 
-# Day 0 stub: exists so the marathon's "merge only when CI is green" gate
-# is meaningful from the first night. Day 1 (TSF-001) replaces this job
-# with the real toolchain: lint + typecheck + test + build, on every push
-# and pull request.
+# TSF-001: real toolchain replacing the Day 0 stub. Every push and PR runs
+# lint, typecheck, unit tests, and a production build. Pushes to main also
+# deploy the built app to GitHub Pages (Pages is configured with
+# build_type=workflow; this workflow is its only build source).
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  verify:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Framework placeholder (replaced by TSF-001)
-        run: |
-          echo "TSF Fitness marathon - Day 0 framework verified."
-          echo "Required framework files:"
-          for f in PROTOCOL.md GOAL.md ROADMAP.md BACKLOG.md ANALYSIS.md RUN-LOG.md DECISIONS.md BLOCKED.md README.md; do
-            if [ ! -f "$f" ]; then
-              echo "MISSING: $f" && exit 1
-            fi
-          done
-          echo "All framework files present. CI green."
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
