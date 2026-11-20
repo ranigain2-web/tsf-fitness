@@ -7,6 +7,18 @@ history.
 
 ---
 
+## 2026-11-21 · Day 1 — PARTIAL (in flight)
+
+- 01:33 — Primary run (job 540076) fired on schedule. Bootstrap OK (fresh
+  clone, main at 5816649). All protocol files read. Idempotency: no entry
+  for today → full cycle. Selected TSF-001 (walking skeleton), bar reused
+  from Day 0 (snapdrop installability/offline; our Pages URL must pass
+  install + offline checks, CI green, Playwright smoke loads offline).
+- 01:34 — Branch `agent/tsf-001-walking-skeleton` opened; BACKLOG status
+  flipped to IN-PROGRESS. **If this run dies: `git fetch origin
+  agent/tsf-001-walking-skeleton`, resume from that branch — it carries
+  this log and the item state.**
+
 ## 2026-11-20 · Day 0 — COMPLETE
 
 - 09:15 — Research report & 30-day marathon plan delivered to owner
