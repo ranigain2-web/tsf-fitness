@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generate TSF Fitness PWA icons: 192, 512, and maskable-512.
+"""Generate TSF Fitness PWA icons: 192, 512, and maskable-192/512.
 
 Design: dark slate rounded square, three vertical bars representing
 Train / Snap / Fuel. Pure geometry, no fonts, no network.
+
+Usage: python3 scripts/gen_icons.py  (from anywhere; writes to
+<path-to-this-repo>/public/icons)
 """
+import os
 from PIL import Image, ImageDraw
 
 SLATE = (15, 23, 42, 255)      # #0f172a
@@ -35,17 +39,24 @@ def make_icon(size: int, rounded: bool, safe_zone: float) -> Image.Image:
     return img
 
 
-out = "/home/z/my-project/repo/public/icons"
-import os
-os.makedirs(out, exist_ok=True)
+def main() -> None:
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out = os.path.join(repo_root, "public", "icons")
+    os.makedirs(out, exist_ok=True)
 
-make_icon(192, rounded=True, safe_zone=0.72).save(f"{out}/icon-192.png")
-make_icon(512, rounded=True, safe_zone=0.72).save(f"{out}/icon-512.png")
-# Maskable: full-bleed square, content inside the 80% safe zone.
-make_icon(512, rounded=False, safe_zone=0.60).save(f"{out}/icon-maskable-512.png")
-make_icon(192, rounded=False, safe_zone=0.60).save(f"{out}/icon-maskable-192.png")
-print("icons written:")
-for f in sorted(os.listdir(out)):
-    p = f"{out}/{f}"
-    img = Image.open(p)
-    print(f"  {f}: {img.size}, {os.path.getsize(p)} bytes")
+    make_icon(192, rounded=True, safe_zone=0.72).save(os.path.join(out, "icon-192.png"))
+    make_icon(512, rounded=True, safe_zone=0.72).save(os.path.join(out, "icon-512.png"))
+    # Maskable: full-bleed square, content inside the 80% safe zone.
+    make_icon(192, rounded=False, safe_zone=0.60).save(
+        os.path.join(out, "icon-maskable-192.png")
+    )
+    make_icon(512, rounded=False, safe_zone=0.60).save(
+        os.path.join(out, "icon-maskable-512.png")
+    )
+    for f in sorted(os.listdir(out)):
+        img = Image.open(os.path.join(out, f))
+        print(f"  {f}: {img.size}")
+
+
+if __name__ == "__main__":
+    main()

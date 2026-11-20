@@ -55,9 +55,13 @@ test('shell loads with name, pillars, and installable manifest', async ({ page }
   })
   expect(manifest.name).toBe('TSF Fitness')
   expect(manifest.display).toBe('standalone')
-  expect(manifest.icons.length).toBeGreaterThanOrEqual(2)
-  const sizes = manifest.icons.map((i: { sizes: string }) => i.sizes)
+  const sizes: string[] = manifest.icons.map((i: { sizes: string }) => i.sizes)
+  expect(sizes).toContain('192x192')
   expect(sizes).toContain('512x512')
+  const maskable = manifest.icons.filter((i: { purpose?: string }) =>
+    (i.purpose ?? '').includes('maskable'),
+  )
+  expect(maskable.length).toBeGreaterThanOrEqual(1)
 })
 
 test('service worker precaches the shell', async ({ page }) => {
@@ -65,10 +69,11 @@ test('service worker precaches the shell', async ({ page }) => {
   await waitForServiceWorker(page)
 
   const paths = await precachePaths(page)
-  // The generated Workbox worker caches manifest, HTML, JS, CSS and icons
-  // (9 entries for this shell: 4 revisioned files + 3 hashed assets +
-  // favicon + webmanifest).
-  expect(paths.length).toBeGreaterThanOrEqual(8)
+  // The generated Workbox worker precaches everything the shell needs
+  // offline: revisioned files (manifest, HTML, favicon, all icons) plus
+  // hashed JS/CSS assets. The floor guards against gross loss while the
+  // member assertions pin the load-bearing entries.
+  expect(paths.length).toBeGreaterThanOrEqual(9)
   expect(paths).toContain('/tsf-fitness/index.html')
   expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.js'))).toBe(true)
   expect(paths.some((p) => p.endsWith('/icons/icon-192.png'))).toBe(true)

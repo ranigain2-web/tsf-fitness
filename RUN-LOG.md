@@ -43,13 +43,28 @@ history.
   3 MAJOR, 7 NIT. Resolutions: BLOCKERs + 5 NITs → PROPOSE FIX
   (verify-deployed CI job: Playwright offline smoke against the live
   Pages URL as the blocking measurement + informational Lighthouse run —
-  the PWA category was removed from Lighthouse 10+, documented; e2e
+  the PWA category was removed from Lighthouse 12.0.0, documented; e2e
   typechecking via tsconfig.e2e.json, negative-tested; e2e script builds
   first; job-level concurrency; maskable-192 icon; --max-warnings 0;
   two comment fixes). 3 NITs → DECLINE with reasons (push+PR duplicate
   runs: the bar text requires CI on every push and PR; no artifact reuse:
   sub-second build, coupling not worth it). README live-app line
   reworded to the CI-deployed truth. Fixes pushed for round 2.
+- 02:5x — Blind critic round 2 (fresh subagent: diff + bar only). PICK:
+  work; biggest gap: none; zero cheat patterns; it re-verified all gates
+  itself and confirmed the Lighthouse PWA category was removed in 12.0.0
+  (not 10+). Remaining findings: 2 MAJOR (the informational Lighthouse
+  step could still redden the job via the artifact-upload failure path;
+  the manifest test was weaker than the config it verifies) + 5 NITs
+  (version number, unpinned lighthouse, wrong precache-count arithmetic,
+  sandbox path in gen_icons.py, README wording) + 1 NIT declined
+  (APP_URL duplicating vite base — one string; deriving it would drag
+  the plugin graph into the E2E runner). All accepted findings fixed:
+  if-no-files-found: ignore + reordered mkdir/cp; manifest test now
+  asserts 192px + 512px + maskable icons; lighthouse pinned as
+  devDependency (^13.6.0); comments corrected; gen_icons.py portable
+  (verified by running it from /tmp); README row reworded. Full gate
+  green again. Fixes pushed for round 3.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 

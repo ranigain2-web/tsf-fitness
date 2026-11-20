@@ -6,9 +6,9 @@ name: CI
 # built app to GitHub Pages (Pages is configured with build_type=workflow;
 # this workflow is its only build source) and then re-run the installability
 # and offline checks against the DEPLOYED URL — the bar's measurement —
-# with Lighthouse recorded alongside (the Lighthouse PWA category no longer
-# exists in Lighthouse 10+; the Playwright offline checks are the blocking
-# measurement, the Lighthouse run is informational).
+# with Lighthouse recorded alongside (Lighthouse 12.0.0 removed the PWA
+# category; the Playwright offline checks are the blocking measurement,
+# the Lighthouse run is informational).
 
 on:
   push:
@@ -85,8 +85,8 @@ jobs:
     # The bar's measurement, run against the live deployment after it
     # lands: the offline smoke suite must pass on the deployed URL, and a
     # Lighthouse report is recorded (non-blocking; the PWA category was
-    # removed from Lighthouse in v10, so installability here is proven by
-    # the Playwright manifest + offline assertions).
+    # removed from Lighthouse in 12.0.0, so installability here is proven
+    # by the Playwright manifest + offline assertions).
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [deploy]
     runs-on: ubuntu-latest
@@ -103,17 +103,21 @@ jobs:
       - name: Offline smoke against the deployed app
         run: npx playwright test
       - name: Lighthouse against the deployed app (informational)
+        # Lighthouse 12.0.0 removed the PWA category (PR #15455), so
+        # installability here is proven by the blocking Playwright step
+        # above; this report is recorded for trend-watching only.
         continue-on-error: true
         run: |
+          mkdir -p lighthouse-report
           npx lighthouse "$E2E_BASE_URL" \
             --chrome-flags="--headless=new" \
             --output=json --output=html \
             --output-path=/tmp/lighthouse/live
-          mkdir -p lighthouse-report
-          cp /tmp/lighthouse/live*.report.* lighthouse-report/ 2>/dev/null || true
+          cp /tmp/lighthouse/live*.report.* lighthouse-report/ || true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-report
           path: lighthouse-report/
+          if-no-files-found: ignore
           retention-days: 7
