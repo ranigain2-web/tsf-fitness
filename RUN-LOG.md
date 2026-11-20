@@ -12,7 +12,7 @@ history.
 All times IST (Asia/Calcutta). Timestamps in this entry are commit times
 from `git log` (UTC+5:30), not estimates — a state-critic round rejected
 the first draft because its timestamps were estimates that contradicted
-repository ground truth; corrected before merge (see the 03:05 entry).
+repository ground truth; corrected before merge (see the 02:40 entry).
 Day 0's afternoon entries were recorded in UTC and stay as written
 (closed history); from this day forward the convention is IST.
 
@@ -40,7 +40,8 @@ Day 0's afternoon entries were recorded in UTC and stay as written
   installability, precache contents, reload with the network cut — 3/3
   green against the production build; e2e job added to CI (3aed3bb) and
   the run-log checkpointed (7241507). Full local gate green.
-- 01:41 — PR #1 opened. CI on PR green (ci + e2e).
+- 01:41 — PR #1 opened. CI on PR (ci + e2e) green, verifiable from ~01:47
+  onward when the checks completed.
 - 01:47 — Blind critic round 1 (fresh subagent: diff + bar only; ran
   01:42–01:46). PICK: bar. It cloned the branch, reproduced every green
   check, then found the real gap: the bar's deployed-URL measurements
@@ -68,7 +69,10 @@ Day 0's afternoon entries were recorded in UTC and stay as written
 - 02:01 — Blind critic round 3 (ran 01:55–02:00). PICK: work; biggest
   gap: none; judged the scaffold as exceeding snapdrop on the named
   dimension. Two new MAJORs (offline hole: CSS/manifest precache
-  unpinned; Lighthouse "recorded" claim unenforced) + 7 NITs. Fixed:
+  unpinned; Lighthouse "recorded" claim unenforced) + 7 NITs.
+  Dispositions close 1:1: 2 MAJORs + 4 NITs fixed (several findings
+  spanned multiple file edits), 1 NIT contested with evidence, 2 NITs
+  declined (settled at same scope). Fixed:
   precache test pins manifest + CSS; offline test asserts the computed
   Tailwind background (styled, not just rendered); Lighthouse report
   presence asserted + scores printed + if-no-files-found: warn; e2e
@@ -108,7 +112,7 @@ Day 0's afternoon entries were recorded in UTC and stay as written
 - 02:25 — CRITIC CAP REACHED (5/5 for TSF-001 today, §4). Per protocol:
   the item does NOT merge today — merge requires critic convergence and
   round 5 picked bar. PR #1 stays open with every finding fixed and the
-  literal measurement dry-run-proven (branch verified at daa7147).
+  literal measurement dry-run-proven.
   **RESUME POINTER:**
   * If you are the 08:30 IST CHECKPOINT on 2026-11-21: the daily critic
     budget for TSF-001 is consumed (5/5). Do NOT run another critic round
@@ -118,24 +122,35 @@ Day 0's afternoon entries were recorded in UTC and stay as written
     anomaly to BLOCKED.md, and stop; otherwise report one line in chat
     and exit.
   * If you are the next day's PRIMARY run (2026-11-22, 01:30 IST):
-    (1) verify the branch head is still daa7147 (the state this log
-    describes); if it moved, re-run the full local gate before the
-    critic; (2) run critic round 6 (fresh day-2 budget) on the full
-    diff; (3) merge PR #1 only after it converges AND CI is green;
-    (4) confirm the deployed-URL verification jobs go green on main;
-    (5) mark TSF-001 DONE and proceed to TSF-002.
+    (1) fetch the blessed head sha from PR #2's description (recorded at
+    state-merge time); if the branch tip differs from it, re-run the
+    full local gate before the critic; (2) run critic round 6 (fresh
+    day-2 budget) on the full diff; (3) merge PR #1 only after it
+    converges AND CI is green; (4) confirm the deployed-URL verification
+    jobs go green on main; (5) mark TSF-001 DONE and proceed to TSF-002.
     Do NOT start TSF-002 while TSF-001 is IN-PROGRESS.
-- 02:57 — State PR #2 opened (agent/state-2026-11-21): journal +
-  BACKLOG/ROADMAP statuses to main, so the 08:30 checkpoint does not
-  restart the day as a duplicate cycle.
-- 03:05 — State-critic round 1 BLOCKED PR #2, correctly: this entry's
-  original timestamps were estimates that contradicted commit ground
-  truth (the session ran 01:30–02:25, not 02:0x–04:1x); the round-1
-  accounting did not close (7 NITs counted as 8; the 3 MAJORs unlisted);
-  the checkpoint resume pointer had no failure path. This entry was
-  rebuilt from `git log` timestamps and the accounting, failure path,
-  and baseline sha (daa7147) added — before anything landed on main.
-  No closed history was rewritten.
+- 02:26 — State PR #2 opened (agent/state-2026-11-21; server timestamp
+  20:56:14Z): journal + BACKLOG/ROADMAP statuses to main, so the 08:30
+  checkpoint does not restart the day as a duplicate cycle.
+- 02:32 — State-critic round 1 (ran ~02:26–02:31) BLOCKED PR #2,
+  correctly: this entry's original timestamps were estimates that
+  contradicted commit ground truth (the session ran 01:30–02:25, not
+  02:0x–04:1x); the round-1 accounting did not close (7 NITs counted as
+  8; the 3 MAJORs unlisted); the checkpoint resume pointer had no
+  failure path. This entry was rebuilt from `git log` timestamps and
+  the accounting, failure path, and baseline sha added — before
+  anything landed on main. Corrections committed 02:32 (97e7362 on this
+  branch, 6a1a452 on the state branch; identical RUN-LOG/BACKLOG blobs
+  on both). No closed history was rewritten.
+- 02:40 — State-critic round 2 BLOCKED PR #2 again, correctly: the two
+  entries above were stamped with estimated times (02:57/03:05) that
+  server-side ground truth contradicted — the same defect class round 1
+  caught, recurring in the correction itself. Re-stamped from server
+  data (PR #2 created_at, commit times); round-3 accounting tightened
+  to close 1:1; PR-#1-opened bullet reworded (CI green is verifiable
+  from ~01:47, not at creation). The resume pointer no longer pins a
+  hardcoded sha (each correction commit moved the head): the blessed
+  head is recorded in PR #2's description at merge time.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
