@@ -1,0 +1,26 @@
+name: CI
+
+# Day 0 stub: exists so the marathon's "merge only when CI is green" gate
+# is meaningful from the first night. Day 1 (TSF-001) replaces this job
+# with the real toolchain: lint + typecheck + test + build, on every push
+# and pull request.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Framework placeholder (replaced by TSF-001)
+        run: |
+          echo "TSF Fitness marathon - Day 0 framework verified."
+          echo "Required framework files:"
+          for f in PROTOCOL.md GOAL.md ROADMAP.md BACKLOG.md ANALYSIS.md RUN-LOG.md DECISIONS.md BLOCKED.md README.md; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f" && exit 1
+            fi
+          done
+          echo "All framework files present. CI green."

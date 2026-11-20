@@ -1,0 +1,17 @@
+# Node
+node_modules/
+dist/
+coverage/
+*.log
+
+# Environment and secrets - NEVER commit
+.env
+.env.*
+remote.txt
+*.token
+agent-state/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
