@@ -21,7 +21,9 @@ def make_icon(size: int, rounded: bool, safe_zone: float) -> Image.Image:
     d = ImageDraw.Draw(img)
     if rounded:
         d.rounded_rectangle([0, 0, size - 1, size - 1], radius=size // 5, fill=SLATE)
-    # Bars occupy the safe zone, centered, with equal gaps.
+    # Bars occupy the safe zone, centered, with equal gaps. The safe_zone
+    # is more conservative than the 80% maskable guideline (0.60 vs 0.80),
+    # keeping the mark clear of any rounded-corner clipping.
     inner = size * safe_zone
     bar_w = inner * 0.14
     gap = inner * 0.10
@@ -29,7 +31,9 @@ def make_icon(size: int, rounded: bool, safe_zone: float) -> Image.Image:
     x0 = (size - total_w) / 2
     bar_h = inner * 0.52
     y0 = (size - bar_h) / 2
-    heights = [bar_h, bar_h * 0.78, bar_h * 0.58]  # rising effort curve
+    heights = [bar_h, bar_h * 0.78, bar_h * 0.58]
+    # Descending bar heights read as a staircase; the accent colors map
+    # them to Train / Snap / Fuel.
     for i, (color, h) in enumerate(zip([BAR_1, BAR_2, BAR_3], heights)):
         bx = x0 + i * (bar_w + gap)
         by = y0 + (bar_h - h)

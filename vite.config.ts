@@ -15,7 +15,6 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'TSF Fitness',
         short_name: 'TSF',

@@ -8,7 +8,11 @@ import { expect, test, type Page } from '@playwright/test'
  * that precaches the shell, and a reload that survives losing the
  * network. They run against the production build (vite preview), the
  * same artifact GitHub Pages serves.
+ *
+ * File-wide light scheme: the styled-offline assertion below pins the
+ * light palette value, so the scheme must be deterministic.
  */
+test.use({ colorScheme: 'light' })
 
 const APP_URL = '/tsf-fitness/'
 
@@ -55,6 +59,11 @@ test('shell loads with name, pillars, and installable manifest', async ({ page }
   })
   expect(manifest.name).toBe('TSF Fitness')
   expect(manifest.display).toBe('standalone')
+  // Relative URLs are the deliberate subpath-safe design (see
+  // vite.config.ts); pin them so a regression to absolute paths fails
+  // loudly here.
+  expect(manifest.start_url).toBe('.')
+  expect(manifest.scope).toBe('.')
   const sizes: string[] = manifest.icons.map((i: { sizes: string }) => i.sizes)
   expect(sizes).toContain('192x192')
   expect(sizes).toContain('512x512')
@@ -70,10 +79,9 @@ test('service worker precaches the shell', async ({ page }) => {
 
   const paths = await precachePaths(page)
   // The generated Workbox worker precaches everything the shell needs
-  // offline: revisioned files (manifest, HTML, favicon, all icons) plus
-  // hashed JS/CSS assets. The floor guards against gross loss while the
-  // member assertions pin every load-bearing entry: HTML, the manifest,
-  // JS, CSS (a styled page requires it), and an icon.
+  // offline — 10 unique URLs for this shell: HTML, webmanifest, favicon,
+  // 4 icons, 2 JS bundles, 1 CSS. The floor guards against gross loss
+  // while the member assertions pin every load-bearing entry.
   expect(paths.length).toBeGreaterThanOrEqual(9)
   expect(paths).toContain('/tsf-fitness/index.html')
   expect(paths).toContain('/tsf-fitness/manifest.webmanifest')
@@ -81,8 +89,6 @@ test('service worker precaches the shell', async ({ page }) => {
   expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.css'))).toBe(true)
   expect(paths.some((p) => p.endsWith('/icons/icon-192.png'))).toBe(true)
 })
-
-test.use({ colorScheme: 'light' })
 
 test('app reloads with the network fully offline', async ({ page }) => {
   await page.goto(APP_URL)
