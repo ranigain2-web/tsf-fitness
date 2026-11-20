@@ -18,6 +18,22 @@ history.
   flipped to IN-PROGRESS. **If this run dies: `git fetch origin
   agent/tsf-001-walking-skeleton`, resume from that branch — it carries
   this log and the item state.**
+- 01:4x — Pages enabled via API (build_type=workflow); live URL
+  https://ranigain2-web.github.io/tsf-fitness/ once main is deployed.
+- 02:0x — Piece 1 pushed: Vite 8 + React 19 + TS scaffold; `tsc -b` +
+  vite build green. Piece 2: Tailwind v4 via @tailwindcss/vite. Piece 3:
+  Vitest + jsdom + Testing Library; 2 render tests green.
+- 02:1x — Piece 4: vite-plugin-pwa 2.0 (generateSW), manifest (relative
+  URLs for the Pages subpath), Pillow-generated 192/512/maskable icons;
+  precache verified to carry shell + assets + icons under /tsf-fitness/.
+  TypeScript pinned to 5.9: typescript-eslint 8 peers <6.1.0; TS 7
+  adoption deferred until the lint toolchain declares support (YAGNI,
+  recorded in the PR).
+- 02:2x — Piece 5: real CI (lint, typecheck, test, build on push/PR) +
+  deploy-pages job gated on main. Piece 6: Playwright offline smoke —
+  manifest installability, precache contents, and a reload with the
+  network cut — 3/3 green locally against the production build; e2e job
+  added to CI. Full local gate green (lint, typecheck, unit, build, e2e).
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
