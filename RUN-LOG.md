@@ -9,113 +9,133 @@ history.
 
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 
-- 01:33 — Primary run (job 540076) fired on schedule. Bootstrap OK (fresh
+All times IST (Asia/Calcutta). Timestamps in this entry are commit times
+from `git log` (UTC+5:30), not estimates — a state-critic round rejected
+the first draft because its timestamps were estimates that contradicted
+repository ground truth; corrected before merge (see the 03:05 entry).
+Day 0's afternoon entries were recorded in UTC and stay as written
+(closed history); from this day forward the convention is IST.
+
+- 01:30 — Primary run (job 540076) fired on schedule. Bootstrap OK (fresh
   clone, main at 5816649). All protocol files read. Idempotency: no entry
   for today → full cycle. Selected TSF-001 (walking skeleton), bar reused
   from Day 0 (snapdrop installability/offline; our Pages URL must pass
   install + offline checks, CI green, Playwright smoke loads offline).
-- 01:34 — Branch `agent/tsf-001-walking-skeleton` opened; BACKLOG status
-  flipped to IN-PROGRESS. **If this run dies: `git fetch origin
-  agent/tsf-001-walking-skeleton`, resume from that branch — it carries
-  this log and the item state.**
-- 01:4x — Pages enabled via API (build_type=workflow); live URL
+- 01:32 — Branch `agent/tsf-001-walking-skeleton` opened; BACKLOG status
+  flipped to IN-PROGRESS (commit 3aa8463). **If this run dies: `git fetch
+  origin agent/tsf-001-walking-skeleton`, resume from that branch.**
+- 01:33 — Pages enabled via API (build_type=workflow); live URL
   https://ranigain2-web.github.io/tsf-fitness/ once main is deployed.
-- 02:0x — Piece 1 pushed: Vite 8 + React 19 + TS scaffold; `tsc -b` +
-  vite build green. Piece 2: Tailwind v4 via @tailwindcss/vite. Piece 3:
-  Vitest + jsdom + Testing Library; 2 render tests green.
-- 02:1x — Piece 4: vite-plugin-pwa 2.0 (generateSW), manifest (relative
-  URLs for the Pages subpath), Pillow-generated 192/512/maskable icons;
-  precache verified to carry shell + assets + icons under /tsf-fitness/.
-  TypeScript pinned to 5.9: typescript-eslint 8 peers <6.1.0; TS 7
-  adoption deferred until the lint toolchain declares support (YAGNI,
-  recorded in the PR).
-- 02:2x — Piece 5: real CI (lint, typecheck, test, build on push/PR) +
-  deploy-pages job gated on main. Piece 6: Playwright offline smoke —
-  manifest installability, precache contents, and a reload with the
-  network cut — 3/3 green locally against the production build; e2e job
-  added to CI. Full local gate green (lint, typecheck, unit, build, e2e).
-- 02:3x — PR #1 opened. CI on PR green (ci + e2e). Pages enabled (API,
-  build_type=workflow).
-- 02:4x — Blind critic round 1 (fresh subagent: diff + bar only). PICK:
-  bar. It cloned the branch and reproduced every green check, then found
-  the real gap: the bar's deployed-URL measurements existed nowhere in
-  the diff (no Lighthouse, smoke targets localhost only). 2 BLOCKER,
-  3 MAJOR, 7 NIT. Resolutions: BLOCKERs + 5 NITs → PROPOSE FIX
-  (verify-deployed CI job: Playwright offline smoke against the live
-  Pages URL as the blocking measurement + informational Lighthouse run —
-  the PWA category was removed from Lighthouse 12.0.0, documented; e2e
+- 01:34 — Scaffold pieces pushed: Vite 8 + React 19 + TS 5.9 shell
+  (99b8d66), Tailwind v4 styling (a91ce8a), Vitest + jsdom render tests
+  (4467086); `tsc -b` + vite build + 2 unit tests green. TypeScript
+  pinned to 5.9: typescript-eslint 8 peers <6.1.0; TS 7 adoption deferred
+  until the lint toolchain declares support (YAGNI, recorded in the PR).
+- 01:36 — PWA piece pushed (31afe81): vite-plugin-pwa 2.0 (generateSW),
+  manifest with relative URLs for the Pages subpath, Pillow-generated
+  192/512/maskable icons; precache probe-verified under /tsf-fitness/.
+- 01:37 — CI piece pushed (c358022): real CI (lint, typecheck, test,
+  build on push/PR) + deploy-pages job gated on main.
+- 01:40 — Playwright piece pushed (3aed3bb): offline smoke — manifest
+  installability, precache contents, reload with the network cut — 3/3
+  green against the production build; e2e job added to CI (3aed3bb) and
+  the run-log checkpointed (7241507). Full local gate green.
+- 01:41 — PR #1 opened. CI on PR green (ci + e2e).
+- 01:47 — Blind critic round 1 (fresh subagent: diff + bar only; ran
+  01:42–01:46). PICK: bar. It cloned the branch, reproduced every green
+  check, then found the real gap: the bar's deployed-URL measurements
+  existed nowhere in the diff (no Lighthouse, smoke targets localhost
+  only). Findings: 2 BLOCKER, 3 MAJOR, 7 NIT. Resolutions — 2 BLOCKERs +
+  3 MAJORs + 5 NITs → PROPOSE FIX (verify-deployed CI job: Playwright
+  offline smoke against the live Pages URL as the blocking measurement +
+  informational Lighthouse run — the PWA category was removed from
+  Lighthouse 12.0.0, documented; README live-app line reworded; e2e
   typechecking via tsconfig.e2e.json, negative-tested; e2e script builds
   first; job-level concurrency; maskable-192 icon; --max-warnings 0;
-  two comment fixes). 3 NITs → DECLINE with reasons (push+PR duplicate
-  runs: the bar text requires CI on every push and PR; no artifact reuse:
-  sub-second build, coupling not worth it). README live-app line
-  reworded to the CI-deployed truth. Fixes pushed for round 2.
-- 02:5x — Blind critic round 2 (fresh subagent: diff + bar only). PICK:
-  work; biggest gap: none; zero cheat patterns; it re-verified all gates
-  itself and confirmed the Lighthouse PWA category was removed in 12.0.0
-  (not 10+). Remaining findings: 2 MAJOR (the informational Lighthouse
-  step could still redden the job via the artifact-upload failure path;
-  the manifest test was weaker than the config it verifies) + 5 NITs
-  (version number, unpinned lighthouse, wrong precache-count arithmetic,
-  sandbox path in gen_icons.py, README wording) + 1 NIT declined
-  (APP_URL duplicating vite base — one string; deriving it would drag
-  the plugin graph into the E2E runner). All accepted findings fixed:
-  if-no-files-found: ignore + reordered mkdir/cp; manifest test now
-  asserts 192px + 512px + maskable icons; lighthouse pinned as
-  devDependency (^13.6.0); comments corrected; gen_icons.py portable
-  (verified by running it from /tmp); README row reworded. Full gate
-  green again. Fixes pushed for round 3.
-- 03:0x — Blind critic round 3 (fresh subagent). PICK: work; biggest gap:
-  none; judged the scaffold as exceeding snapdrop on the named dimension.
-  Two new MAJORs (offline guarantee hole: CSS/manifest precache unpinned;
-  Lighthouse "recorded" claim unenforced) + 7 NITs. Fixed: precache test
-  now pins manifest + CSS; offline test asserts the computed Tailwind
-  background (styled, not just rendered — oklch literal); Lighthouse
-  report presence asserted + scores printed + if-no-files-found: warn;
-  e2e concurrency group; try/finally for setOffline; devices spread
-  dedup; @types/node pinned to 24; manifest description no longer
-  advertises the unbuilt camera-AI capability; Pillow declared in
-  requirements-dev.txt. CONTESTED with evidence: the verify→ci check-name
-  rename (GET branch protection = 404; nothing to break). DECLINED:
-  push+PR double-run and deploy rebuild (settled at same scope).
-- 03:2x — Blind critic round 4 (fresh subagent). PICK: work; zero
+  two comment fixes), 2 NITs → DECLINE with reasons (push+PR duplicate
+  runs: the bar text requires CI on every push and PR; no artifact
+  reuse: sub-second build, coupling not worth it). Fixes pushed
+  (0cb297a).
+- 01:54 — Blind critic round 2 (ran 01:48–01:53). PICK: work; biggest
+  gap: none; zero cheat patterns; re-verified all gates itself and
+  corrected the Lighthouse fact to 12.0.0. Remaining: 2 MAJOR (the
+  informational Lighthouse step could redden the job via the artifact
+  path; the manifest test was weaker than the config it verifies) +
+  5 NITs (unpinned lighthouse, wrong precache-count arithmetic, sandbox
+  path in gen_icons.py, README wording, version number) + 1 NIT declined
+  (APP_URL duplicating vite base). All accepted findings fixed
+  (c8e2233).
+- 02:01 — Blind critic round 3 (ran 01:55–02:00). PICK: work; biggest
+  gap: none; judged the scaffold as exceeding snapdrop on the named
+  dimension. Two new MAJORs (offline hole: CSS/manifest precache
+  unpinned; Lighthouse "recorded" claim unenforced) + 7 NITs. Fixed:
+  precache test pins manifest + CSS; offline test asserts the computed
+  Tailwind background (styled, not just rendered); Lighthouse report
+  presence asserted + scores printed + if-no-files-found: warn; e2e
+  concurrency group; try/finally for setOffline; devices spread dedup;
+  @types/node pinned to 24; manifest description no longer advertises
+  the unbuilt camera-AI capability; Pillow declared in
+  requirements-dev.txt. CONTESTED with evidence: the verify→ci
+  check-name rename (branch protection API = 404; nothing to break).
+  DECLINED: push+PR double-run and deploy rebuild (settled at same
+  scope). Fixes pushed (a322cf4).
+- 02:09 — Blind critic round 4 (ran 02:02–02:08). PICK: work; zero
   BLOCKERs. Fetched snapdrop live: its service-worker.js now 404s — the
   reference's own offline behavior is broken, while ours is proven. Two
   MAJORs resolved: the bar's LITERAL measurement restored — a blocking
-  lighthouse PWA-category step pinned to the last version carrying the
-  category, plus precache dedup (includeAssets removed; 10 unique URLs,
-  probe-verified), manifest start_url/scope pinned, test.use hoisted,
-  icon-script comments corrected.
-- 04:0x — Blind critic round 5 (fresh subagent). PICK: bar. It executed
-  the LH11 command and found the round-4 fix triple-broken: lighthouse
-  11.9.0 does not exist (11.x ends at 11.7.1), LH 11's printer never
-  mkdirs the output dir, and the raw output path breaks the require.
-  Plus a MAJOR: no retry for the Pages propagation window after deploy.
-  All fixes applied EXACTLY as prescribed, then dry-run EXECUTED locally
-  against the production build: pin resolves (11.7.1), CHROME_PATH
-  located from the Playwright Chromium, chrome flags established
-  (--headless=new --no-sandbox --remote-allow-origins=*), raw output
-  path confirmed, and the blocking check PASSES — Lighthouse 11.7.1
-  PWA score 1/1 on both available Chromium versions, all six audits
-  green including maskable-icon. Also fixed: retry loop for the
-  deployed-URL smoke (5 attempts, 20s apart), precache count pinned
-  exactly 10, lighthouse devDep pinned exact 13.6.0, icons now truly
-  rounded (transparent corners; maskable stays full-bleed).
-- 04:1x — CRITIC CAP REACHED (5/5 for TSF-001 today, §4). Per protocol:
+  lighthouse PWA-category step pinned to what the round-4 critic claimed
+  was the last category-carrying version (11.9.0 — accepted without
+  registry verification: the error round 5 then caught), plus precache
+  dedup (includeAssets removed; 10 unique URLs, probe-verified), manifest
+  start_url/scope pinned, test.use hoisted, icon-script comments
+  corrected. Fixes pushed (018fad8).
+- 02:23 — Blind critic round 5 (ran 02:10–02:15). PICK: bar. It executed
+  the LH11 command and found the round-4 fix triple-broken:
+  lighthouse@11.9.0 does not exist (11.x ends at 11.7.1), LH 11's
+  printer never mkdirs the output dir, and the raw output path breaks
+  the require. Plus a MAJOR: no retry for the Pages propagation window
+  after deploy. All fixes applied exactly as prescribed, then dry-run
+  EXECUTED locally (02:16–02:22) against the production build: pin
+  resolves (11.7.1), CHROME_PATH located from the Playwright Chromium,
+  chrome flags established (--headless=new --no-sandbox
+  --remote-allow-origins=*), raw output path confirmed, and the blocking
+  check PASSES — Lighthouse 11.7.1 PWA score 1/1 on both available
+  Chromium versions, all six audits green including maskable-icon. Also
+  fixed: retry loop for the deployed-URL smoke (5 attempts, 20s apart),
+  precache count pinned exactly 10, lighthouse devDep pinned exact
+  13.6.0, icons now truly rounded (transparent corners; maskable stays
+  full-bleed). Fixes pushed (b402c10); run-log checkpointed (25b00c4).
+- 02:25 — CRITIC CAP REACHED (5/5 for TSF-001 today, §4). Per protocol:
   the item does NOT merge today — merge requires critic convergence and
-  round 5 picked bar. The PR stays open with every finding fixed and the
-  literal measurement dry-run-proven. **RESUME POINTER:**
+  round 5 picked bar. PR #1 stays open with every finding fixed and the
+  literal measurement dry-run-proven (branch verified at daa7147).
+  **RESUME POINTER:**
   * If you are the 08:30 IST CHECKPOINT on 2026-11-21: the daily critic
     budget for TSF-001 is consumed (5/5). Do NOT run another critic round
     today, do NOT merge, do NOT start TSF-002. Verify PR #1 is open with
-    green CI, then report one line in chat and exit.
+    green CI; if it is closed, CI is red, or the branch moved
+    unexpectedly, record what you found in a new state PR, write the
+    anomaly to BLOCKED.md, and stop; otherwise report one line in chat
+    and exit.
   * If you are the next day's PRIMARY run (2026-11-22, 01:30 IST):
-    (1) re-run the full local gate on the branch if anything changed;
-    (2) run critic round 6 (fresh day-2 budget) on the full diff;
-    (3) merge PR #1 only after it converges AND CI is green;
+    (1) verify the branch head is still daa7147 (the state this log
+    describes); if it moved, re-run the full local gate before the
+    critic; (2) run critic round 6 (fresh day-2 budget) on the full
+    diff; (3) merge PR #1 only after it converges AND CI is green;
     (4) confirm the deployed-URL verification jobs go green on main;
     (5) mark TSF-001 DONE and proceed to TSF-002.
-    Do NOT start TSF-002 while TSF-001 is IN-PROGRESS.**
+    Do NOT start TSF-002 while TSF-001 is IN-PROGRESS.
+- 02:57 — State PR #2 opened (agent/state-2026-11-21): journal +
+  BACKLOG/ROADMAP statuses to main, so the 08:30 checkpoint does not
+  restart the day as a duplicate cycle.
+- 03:05 — State-critic round 1 BLOCKED PR #2, correctly: this entry's
+  original timestamps were estimates that contradicted commit ground
+  truth (the session ran 01:30–02:25, not 02:0x–04:1x); the round-1
+  accounting did not close (7 NITs counted as 8; the 3 MAJORs unlisted);
+  the checkpoint resume pointer had no failure path. This entry was
+  rebuilt from `git log` timestamps and the accounting, failure path,
+  and baseline sha (daa7147) added — before anything landed on main.
+  No closed history was rewritten.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
