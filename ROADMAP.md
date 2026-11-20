@@ -13,7 +13,7 @@ Legend: `DONE` / `PARTIAL` (resume pointer in RUN-LOG.md) / `TODO` / `SKIPPED`
 | Day | Goal | Key deliverables | Acceptance bar | Status |
 |---|---|---|---|---|
 | 0 | Framework | Repo, protocol, goals, roadmap, backlog, CI stub, cron armed | Fresh clone + this file + green CI | DONE |
-| 1 | Walking skeleton | Vite + React + TS + Tailwind scaffold; PWA plugin with offline precache; CI (lint, typecheck, test, build); deploy to GitHub Pages; Playwright smoke | CI green on main; Pages URL serves an installable shell that loads with the network off; one E2E passes | TODO |
+| 1 | Walking skeleton | Vite + React + TS + Tailwind scaffold; PWA plugin with offline precache; CI (lint, typecheck, test, build); deploy to GitHub Pages; Playwright smoke | CI green on main; Pages URL serves an installable shell that loads with the network off; one E2E passes | PARTIAL (built + 5 critic rounds; merge after round 6 converges — RUN-LOG resume pointer) |
 | 2 | Local data model | Dexie schema (profiles, exercises, routines, sessions, sets, foods, logs); typed entities; migration framework; seed fixtures | Round-trip unit tests pass; v1-data migration test rolls forward cleanly in CI | TODO |
 | 3 | Exercise library | Import open exercise dataset (wger / free-exercise-db) with muscle + equipment tags; searchable picker; attribution in README | ≥300 exercises importable; any exercise findable within two interactions in an E2E test | TODO |
 | 4 | Workout logger core | Routine builder; session player (sets, reps, weight, rest timer, RPE); offline by construction | A complete workout logged in an airplane-mode E2E run; session survives reload | TODO |

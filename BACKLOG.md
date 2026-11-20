@@ -16,7 +16,7 @@ multi-day (then note it here).
 
 ## Week 1 — Foundation
 
-### TSF-001 · D1 · Walking skeleton — PRIORITY 1 · STATUS: TODO
+### TSF-001 · D1 · Walking skeleton — PRIORITY 1 · STATUS: IN-PROGRESS (branch `agent/tsf-001-walking-skeleton`, PR #1; critic rounds 5/5 used on 2026-11-21 — §4 cap reached, merge deferred to the next day's run after round 6 converges; see RUN-LOG resume pointer)
 
 **Deliverables:** Vite + React + TypeScript + Tailwind scaffold;
 vite-plugin-pwa with offline precache; GitHub Actions CI running lint,
