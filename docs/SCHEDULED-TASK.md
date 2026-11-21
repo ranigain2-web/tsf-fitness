@@ -7,20 +7,19 @@ them at any time.
 
 **2026-11-21 (Day 1):** after the owner's review of the 01:30 run, the
 cycle message was upgraded to **v2** (mandatory skill loading + depth
-floor, PROTOCOL.md v1.1 / DECISIONS.md ruling #7). The two live jobs
-still carry message v1 until the swap below completes — harmless,
-because v1 step (3) reads PROTOCOL.md in full, so v1.1 rules apply to
-every run even before the swap. The swap only aligns the payload.
+floor, PROTOCOL.md v1.1 / DECISIONS.md ruling #7) and both live jobs
+were swapped to it the same morning (see Migration below). Old jobs
+540076/540077 are deleted; the v2 jobs below are live.
 
 ## Live tasks
 
 | | Task 1 — Primary | Task 2 — Checkpoint |
 |---|---|---|
-| Name | TSF Marathon - Primary 0130 IST | TSF Marathon - Checkpoint 0830 IST |
-| Platform job ID | 540076 | 540077 |
+| Name | TSF Marathon - Primary 0130 IST v2 | TSF Marathon - Checkpoint 0830 IST v2 |
+| Platform job ID | 540650 | 540651 |
 | Schedule | Daily **01:30** Asia/Calcutta (cron `0 30 1 * * ?`) | Daily **08:30** Asia/Calcutta (cron `0 30 8 * * ?`) |
 | Priority | Highest (15) | Highest (15) |
-| Message | v1 (as created Day 0) — swap to v2 pending, see Migration | v1 (as created Day 0) — swap to v2 pending, see Migration |
+| Message | v2 (live) | v2 (live) |
 
 The checkpoint task is idempotent: if the primary run already completed
 today, it exits after one line (PROTOCOL.md §1.3). Both tasks send the
@@ -95,31 +94,40 @@ change LICENSE, never print the credential, never work outside
 blocks compliance, record why in RUN-LOG.md and stop.
 ```
 
-## Migration: swapping the live jobs from v1 to v2
+## Migration: v1 → v2 (COMPLETED 2026-11-21, 07:21–07:35 IST)
 
-The scheduling tool was unavailable when v2 was authored (Day 1
-morning, four attempts — it had flapped on Day 0 too and returned in a
-later turn). Whoever gets the tool first completes the swap; until
-then, nothing is broken (see the note above). Procedure, in order:
+Executed by the agent in the supervised owner turn that followed the
+protocol-v1.1 merge (PR #3). The scheduling tool flapped throughout —
+roughly one successful call per two-minute window — so each step needed
+spaced retries. Sequence, all verified by tool responses:
 
-1. `list` the jobs. If two tasks with the v2 names below already
-   exist and 540076/540077 are gone, the swap is done — only update
-   this table with the new job IDs.
-2. **Create the new jobs first** (never delete before creating — a
-   missing task costs missed days; a duplicate costs nothing because
-   both messages are idempotent under PROTOCOL.md §1.3):
+1. `list` — confirmed both v1 jobs alive (540076 had already fired
+   01:30, "succeeded"; 540077 pending 08:30).
+2. Extracted the v2 message programmatically from `origin/main`
+   `docs/SCHEDULED-TASK.md` (4,105 chars, sha256 prefix `cf67d26f`) —
+   never retyped by hand.
+3. Created **540650** `TSF Marathon - Primary 0130 IST v2` and
+   **540651** `TSF Marathon - Checkpoint 0830 IST v2` (create-before-
+   delete: a duplicate is harmless under §1.3 idempotency, a missing
+   task costs missed days). Both Asia/Calcutta, priority 15,
+   `agentTurn`, message v2 verbatim.
+4. Deleted **540076**, then **540077** — both deletes returned success.
+5. This table updated; procedure below kept as reference for any future
+   recreation.
+
+### Reference: the swap procedure (if tasks ever need recreating)
+
+1. `list` the jobs; note what already exists.
+2. **Create the new jobs first** (never delete before creating):
    name `TSF Marathon - Primary 0130 IST v2`, cron `0 30 1 * * ?`,
    tz `Asia/Calcutta`, priority 15, payload kind `agentTurn`, message =
    the v2 text above, verbatim; then the same for
    `TSF Marathon - Checkpoint 0830 IST v2`, cron `0 30 8 * * ?`.
-   (If the platform rejects a name, retry with a ` v2` suffix already
-   present — it is in the names above on purpose.)
 3. `list` again and verify both new jobs exist with the right schedules.
-4. `delete` job 540076, then `delete` job 540077. `list` once more and
-   verify they are gone. If a delete fails, record the surviving job ID
-   in RUN-LOG.md — the next run retries just the delete.
-5. Update the Live tasks table above with the new job IDs and drop this
-   Migration section's "pending" wording.
+4. `delete` the old job IDs, then `list` once more and verify they are
+   gone. If a delete fails, record the surviving job ID in RUN-LOG.md —
+   the next run retries just the delete.
+5. Update the Live tasks table above with the new job IDs.
 
 ## Manual trigger (works anytime)
 

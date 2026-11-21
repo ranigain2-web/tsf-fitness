@@ -177,6 +177,21 @@ Day 0's afternoon entries were recorded in UTC and stay as written
   verify, then delete 540076/540077; best-effort — if the scheduler
   tool is still unavailable, say so in one line and exit). The swap
   must not expand the checkpoint beyond that.
+- 07:35 — Cron swap COMPLETED in a second supervised owner turn, so
+  the addendum above is already satisfied. The scheduler tool returned
+  but flapped throughout (one successful call per ~2-minute window;
+  every step needed spaced retries). Sequence, all verified by tool
+  responses: `list` confirmed both v1 jobs alive; the v2 message was
+  extracted programmatically from origin/main (4,105 chars, sha256
+  prefix cf67d26f — never retyped); created 540650 (Primary 0130 IST
+  v2) and 540651 (Checkpoint 0830 IST v2), both Asia/Calcutta,
+  priority 15, message v2 verbatim; then deleted 540076 and 540077
+  (both deletes returned success). **If you are the 08:30 IST
+  CHECKPOINT today: you are job 540651; the swap is done — do NOT
+  attempt it again. Do only the one-line PR #1 verification (open,
+  branch unmoved, ci+e2e green) and exit; skill loading may be skipped
+  per the §1 checkpoint exemption.** docs/SCHEDULED-TASK.md now
+  records the live pair 540650/540651 and the completed migration.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
