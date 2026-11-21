@@ -151,6 +151,32 @@ Day 0's afternoon entries were recorded in UTC and stay as written
   from ~01:47, not at creation). The resume pointer no longer pins a
   hardcoded sha (each correction commit moved the head): the blessed
   head is recorded in PR #2's description at merge time.
+- 07:14 — Supervised owner turn (not a cron fire) reviewed the whole
+  01:30 run. Verdict: cycle executed correctly and densely (76 min,
+  01:30–02:46; 17 commits on the work branch + 3 state commits; PR #1
+  ci+e2e green; PR #2 merged after 3 state-critic rounds), but three
+  flaw classes surfaced: (a) journal timestamps estimated from memory
+  — blocked twice by state critics, recurring inside the correction;
+  (b) a critic-prescribed pin adopted without registry verification
+  (lighthouse@11.9.0 does not exist; 11.x ends at 11.7.1) — cost a
+  round to catch; (c) the bar's Lighthouse measurement was configured
+  but never executed until round 5 forced the dry-run. Also: the run
+  never loaded the gauntlet-loop/EGM skills — it worked from the
+  PROTOCOL.md distillation only. Owner directed PROTOCOL.md v1.1
+  (DECISIONS.md ruling #7): mandatory Skill-tool loading of
+  gauntlet-loop + egm-review-loop every primary run; §5 prescription
+  verification; §13 depth floor (executed evidence, server-stamped
+  timestamps, no early stop, next item after an early merge); and
+  scheduled-task message v2 (docs/SCHEDULED-TASK.md). The scheduler
+  tool was unavailable this turn (4 attempts), so jobs 540076/540077
+  still carry message v1 — harmless until swapped (v1 step 3 reads
+  PROTOCOL.md in full, so v1.1 governs either way).
+  ADDENDUM to the 08:30 resume pointer above: after the one-line PR #1
+  verification, attempt the cron swap to message v2 exactly per
+  docs/SCHEDULED-TASK.md "Migration" (create the two v2 jobs first,
+  verify, then delete 540076/540077; best-effort — if the scheduler
+  tool is still unavailable, say so in one line and exit). The swap
+  must not expand the checkpoint beyond that.
 
 ## 2026-11-20 · Day 0 — COMPLETE
 
