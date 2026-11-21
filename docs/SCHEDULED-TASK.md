@@ -115,6 +115,15 @@ spaced retries. Sequence, all verified by tool responses:
 5. This table updated; procedure below kept as reference for any future
    recreation.
 
+**Platform clock note (verified during this swap):** the job records'
+`create_time`/`update_time` carry no timezone offset and do not
+reliably match wall-clock — 540650's stamp converts cleanly from UTC+8
+to its verified creation time, but 540651's is ~12 minutes later than
+its verified creation. Never timestamp RUN-LOG entries from the
+scheduler tool's job records (§13): use `git log`, the GitHub API, or
+a fresh `date` call. `next_run_time` carries an explicit `+05:30`
+offset and matched both jobs' schedules exactly — trust that field.
+
 ### Reference: the swap procedure (if tasks ever need recreating)
 
 1. `list` the jobs; note what already exists.
