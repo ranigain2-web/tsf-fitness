@@ -14,6 +14,7 @@ chat are transcribed here by the next run.
 | 4 | Schedule | Two runs daily: 01:30 IST primary + 08:30 IST checkpoint (idempotent), highest priority | 2026-11-20 |
 | 5 | Repository | Public GitHub repo `ranigain2-web/tsf-fitness`, marked as a template; framework lives IN the repo so a fresh clone carries everything | 2026-11-20 |
 | 6 | Process skills | Gauntlet methodology for bars + blind critics; EGM for the build process (design notes, Goldfish reviews, severity-tagged findings, resolve/contest/escalate, drift audits) | 2026-11-20 |
+| 7 | Run depth & skill loading | Protocol v1.1, owner-directed after the Day 1 primary-run review: every primary run loads `gauntlet-loop` + `egm-review-loop` via the Skill tool before work (phase EGM skills as routed in §1); depth floor §13 (executed measurements, server-stamped timestamps, registry-verified critic prescriptions, no early stop, next item after an early merge); scheduled-task message upgraded to v2 (docs/SCHEDULED-TASK.md) | 2026-11-21 |
 
 ## Adopted defaults (owner may override anytime — say so in chat)
 

@@ -1,6 +1,8 @@
 # TSF Fitness — Marathon Operations Protocol
 
-**Version 1.0 · Day 0 · 2026-11-20**
+**Version 1.1 · Day 1 · 2026-11-21** (v1.1 owner-directed after the Day 1
+primary-run review: adds §1 skill loading, §5 prescription verification,
+§13 depth floor)
 
 This file is the operating rulebook for every autonomous run of the TSF Fitness
 build marathon. Read it in full before doing anything else. It fuses two
@@ -35,7 +37,8 @@ Every run executes these ten steps, in order:
    clone every run means the repository is the only truth.
 2. **Orient.** Read, in order: this file, `GOAL.md`, `ROADMAP.md`,
    `BACKLOG.md`, the latest `RUN-LOG.md` entries, `DECISIONS.md`,
-   `BLOCKED.md`, `ANALYSIS.md`.
+   `BLOCKED.md`, `ANALYSIS.md`. Then load the process skills — see
+   "Skill loading" below; it is part of orienting, not optional.
 3. **Idempotency check.** If `RUN-LOG.md` already has today's date with
    status `COMPLETE`, reply with one line and stop. If today's entry is
    `PARTIAL`, continue exactly where it says the work stopped.
@@ -52,6 +55,19 @@ Every run executes these ten steps, in order:
     with a resume pointer), update `BACKLOG.md` states, push state, and end
     the run with a short chat summary: what shipped, what passed the critic,
     what needs the owner.
+
+**Skill loading (mandatory, every primary run).** Immediately after step
+2, invoke the Skill tool and load `gauntlet-loop` and `egm-review-loop`,
+in that order, and follow them as the source methodology — this file is
+the distillation, the skills are the original context, and a run that
+skips them gradually drifts to the distilled minimum. Load phase-specific
+EGM skills when the phase calls for them: `egm-brainstorm` when a backlog
+item's design is genuinely unsettled, `egm-draft` when writing a design
+note (§3), `egm-review` when reviewing design documents, `egm-resolve`
+when folding concurrent reviewer findings into one pass, `egm-drift-report`
+on review days (§9). A checkpoint run that exits early via §1.3 may skip
+skill loading. If the Skill tool is unavailable in a run, record that in
+`RUN-LOG.md` and proceed on this file alone.
 
 ## 2. Bars — the gauntlet rules
 
@@ -171,6 +187,13 @@ Categorize every critic finding, exactly one of:
   your recommendation and a safe default, then proceed with other work.
 - **DECLINE** — a NIT not worth the churn. Record it; do not fix it.
 
+When a **PROPOSE FIX** prescribes a specific version, flag, command, or
+API, treat the prescription as a hypothesis, not evidence: verify the pin
+resolves on the registry and dry-run the command before pushing the fix.
+A critic can be wrong in the opposite direction, and an unverified
+prescription costs a full round to catch (Day 1: a round-4 pin on
+`lighthouse@11.9.0`, which does not exist — 11.x ends at 11.7.1).
+
 Record the categorization in the PR description. ESCALATE items also go in
 the run summary so the owner sees them without opening the repo.
 
@@ -275,3 +298,34 @@ The only thing that lives outside the repo is the credential
   split it or defer it, and ESCALATE a note in `DECISIONS.md`.
 - A run that finds itself mostly waiting (installs, long builds) should
   shrink scope, not extend time.
+
+## 13. Depth floor — verified evidence, not claimed evidence
+
+A cycle is not done when the steps are ticked; it is done when the bar is
+met by **executed** evidence. Every rule below exists because Day 1
+showed the failure mode it prevents. The owner's standing directive: use
+the full run — a short green run that stops with capacity and work left
+is a defect, not efficiency.
+
+- **Every measurement gets executed.** Any check the bar names
+  (Lighthouse, offline smoke, installability, deploy verification) must
+  actually run at least once before you call it green — locally against
+  the production build when the deployed URL is not live yet — with the
+  output recorded in the PR or run log. A configured-but-never-executed
+  measurement is a claim, not evidence (Day 1: the bar's Lighthouse
+  measurement existed only in CI config until critic round 5 forced a
+  dry-run, which then broke three assumptions at once).
+- **Timestamps come from servers, never memory.** Every time written
+  into `RUN-LOG.md` or a PR must come from `git log`, the GitHub API
+  (`created_at` / `merged_at`), or a fresh `date` call — never estimated
+  or reconstructed from feel. Day 1's journal was blocked twice by state
+  critics for estimated timestamps, and the second block was for the
+  same defect recurring inside the correction itself.
+- **A run does not stop early.** If the item converged, merged, and
+  capacity remains, select the next `TODO` item and start its cycle in
+  the same run (checkpoint per §7 so it can hand off mid-flight). At the
+  critic cap with the merge deferred, spend the remaining capacity
+  hardening: re-run the full local gate, dry-run every bar measurement
+  against the production build, re-verify every pin, strengthen the
+  weakest test. Depth means verified work, not elapsed clock — §12's
+  shrink-scope-when-waiting rule still applies.
