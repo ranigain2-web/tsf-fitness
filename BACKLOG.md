@@ -16,7 +16,7 @@ multi-day (then note it here).
 
 ## Week 1 — Foundation
 
-### TSF-001 · D1 · Walking skeleton — PRIORITY 1 · STATUS: IN-PROGRESS (branch `agent/tsf-001-walking-skeleton`, PR #1; critic rounds 5/5 used on 2026-11-21 — §4 cap reached, merge deferred to the next day's run after round 6 converges; see RUN-LOG resume pointer)
+### TSF-001 · D1 · Walking skeleton — PRIORITY 1 · STATUS: DONE (PR #1 merged 2026-11-22 as 2dc73550 after 7 critic rounds across two days; deployed URL verified live by CI: offline smoke + LH11 PWA 1/1)
 
 **Deliverables:** Vite + React + TypeScript + Tailwind scaffold;
 vite-plugin-pwa with offline precache; GitHub Actions CI running lint,
@@ -39,7 +39,7 @@ the tool choices and why (YAGNI lens).
 
 ---
 
-### TSF-002 · D2 · Local data model — PRIORITY 2 · STATUS: TODO
+### TSF-002 · D2 · Local data model — PRIORITY 2 · STATUS: DONE (PR #6, 2 critic rounds both picking the work; round-trip + migration tests on fake-indexeddb AND real Chromium; seed gated in CI)
 
 **Deliverables:** Dexie schema for profiles, exercises, routines, sessions,
 sets, foods, day-logs; typed entities; migration framework; seed script

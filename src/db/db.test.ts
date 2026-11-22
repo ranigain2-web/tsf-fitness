@@ -7,7 +7,7 @@
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import Dexie from 'dexie'
 import { describe, expect, it } from 'vitest'
-import { TsfDb, V1_SCHEMA } from './db.ts'
+import { TsfDb, V1_SCHEMA, V2_SCHEMA } from './db.ts'
 import { FIXTURES } from './fixtures.ts'
 import { seedDatabase } from './seed.ts'
 
@@ -85,9 +85,26 @@ const FROZEN_V1 = {
   dayLogs: 'id',
 } as const
 
+// The shipped v2 block — the one with the upgrader attached, which
+// Dexie's docs say must never be altered — gets the same tripwire.
+const FROZEN_V2 = {
+  ...FROZEN_V1,
+  exercises: 'id, name, source, *muscleGroups',
+  sets: 'id, sessionId, exerciseId, [sessionId+exerciseId]',
+  foods: 'id, name, barcode',
+} as const
+
 describe('v1 → v2 migration', () => {
-  it('the shipped v1 block is frozen verbatim', () => {
+  it('the shipped v1 and v2 blocks are frozen verbatim', () => {
     expect(V1_SCHEMA).toEqual(FROZEN_V1)
+    expect(V2_SCHEMA).toEqual(FROZEN_V2)
+  })
+
+  it('a fresh database opens at the current version', async () => {
+    const db = freshDb()
+    await db.open()
+    expect(db.verno).toBe(2)
+    await db.close()
   })
 
   it('rolls a seeded v1 database forward to current, every table intact', async () => {

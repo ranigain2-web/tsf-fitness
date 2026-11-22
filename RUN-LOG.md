@@ -7,7 +7,7 @@ history.
 
 ---
 
-## 2026-11-22 · Day 2 — PARTIAL (in flight)
+## 2026-11-22 · Day 2 — COMPLETE
 
 All times IST (Asia/Calcutta), from `date` calls, `git log`, and the
 GitHub API. **Context: this cycle is a MANUAL trigger.** The owner asked
@@ -186,6 +186,42 @@ in chat whether the scheduled tasks fired; they did not (see 08:36).
   the app tsconfig allows them) after the seed runner failed on
   extensionless imports; eslint override added for CLI scripts
   (no-console is an app-code rule, not a tooling rule).
+
+- 09:45 — **Correction (critic round 2, finding 3):** the 09:30 bullet
+  said "precache stays 11" — false from the round-1 fixes onward: the
+  multi-page build (db-e2e entry) split the modulepreload polyfill out
+  as a shared shell chunk, so the precache is 12 unique URLs (pin
+  updated consciously in the same commit; db-e2e itself excluded via
+  globIgnores). Also: the round-1 fix commit initially sat on a
+  DETACHED HEAD (a critic subagent had left HEAD detached) and a
+  silent `git push -q` reported nothing — caught by comparing the PR
+  head to the branch tip. Lesson recorded: a quiet push is not
+  evidence; verify `origin/<branch>` moved.
+- 10:15 — Critic round 2 (fresh subagent): **PICK: work** — both bar
+  halves met, zero BLOCKERs; it mutation-tested the frozen-v1 tripwire
+  (fires correctly) and re-ran the whole gate itself. 3 MAJOR: (a) the
+  freeze tripwire covered only v1, not the upgrader-attached v2 block;
+  (b) the real-engine page seeded 1 legacy row in 1 table vs the unit
+  test's 7; (c) the stale "precache stays 11" journal claim (corrected
+  above). Fixes: FROZEN_V2 literal + fresh-db verno assert; the
+  /db-e2e page now mirrors the unit test — one legacy row per table,
+  per-table intactness, all three v2 indexes exercised on real
+  Chromium; journal corrected. DECLINED (recorded): close→reopen
+  round-trips in unit tests (the migration tests already close and
+  reopen; the e2e page too), coordinated-edit tamper-proofing of the
+  frozen literals (a chain snapshot is heavier than the threat model —
+  advisory tripwire acknowledged), tsconfig double-compilation note
+  (both programs strict; revisit if they diverge).
+- 10:20 — Day 2 close-out. Shipped this cycle: TSF-001 MERGED and
+  LIVE (first deploy; verify-deployed green on main; LH11 PWA 1/1 on
+  the deployed URL), TSF-002 MERGED (Dexie data model: 7 typed
+  entities, versions 1→2 frozen + tripwired, seed gated in CI,
+  round-trip + migration tests on fake AND real engines). Both bars
+  met with executed evidence. Scheduled tasks did NOT fire today
+  (see 08:36) — this cycle was the documented manual fallback. The
+  scheduler's job status remains unverifiable (tool unavailable all
+  turn); tomorrow's 01:30 fire is the live test, and the manual
+  trigger remains available to the owner anytime.
 
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 

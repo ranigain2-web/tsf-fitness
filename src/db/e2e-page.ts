@@ -18,11 +18,65 @@ interface Result {
   detail: string
 }
 
+// One legacy row per table — mirrors the unit test: every table must
+// survive the real-engine roll-forward, not just profiles.
+const LEGACY_ROWS: Record<string, { id: string } & Record<string, unknown>> = {
+  profiles: {
+    id: 'legacy-profile-000',
+    name: 'Legacy User',
+    createdAt: 1,
+    updatedAt: 2,
+  },
+  exercises: {
+    id: 'legacy-exercise-000',
+    name: 'Old Row',
+    muscleGroups: ['chest'],
+    equipment: null,
+    source: 'builtin',
+    createdAt: 3,
+  },
+  routines: {
+    id: 'legacy-routine-000',
+    name: 'Old Routine',
+    exerciseIds: ['legacy-exercise-000'],
+    createdAt: 3,
+  },
+  sessions: {
+    id: 'legacy-session-000',
+    routineId: 'legacy-routine-000',
+    startedAt: 4,
+    endedAt: null,
+    notes: null,
+  },
+  sets: {
+    id: 'legacy-set-000',
+    sessionId: 'legacy-session-000',
+    exerciseId: 'legacy-exercise-000',
+    order: 1,
+    reps: 5,
+    weightKg: 100,
+    rpe: null,
+    done: true,
+    doneAt: 5,
+  },
+  foods: {
+    id: 'legacy-food-000',
+    name: 'Old Food',
+    brand: null,
+    barcode: '4006381333931',
+    per100g: { kcal: 1, protein: 1, carb: 1, fat: 1 },
+    source: 'custom',
+  },
+  dayLogs: {
+    id: '2026-11-01',
+    entries: [{ foodId: 'legacy-food-000', grams: 100, meal: 'lunch' }],
+    updatedAt: 6,
+  },
+}
+
 function deleteDatabase(name: string): Promise<void> {
   return new Promise((resolve) => {
     const req = indexedDB.deleteDatabase(name)
-    // Deleting a nonexistent database is a success; blocked resolves
-    // too — the next open would just wait its turn.
     req.onsuccess = () => resolve()
     req.onerror = () => resolve()
     req.onblocked = () => resolve()
@@ -46,7 +100,9 @@ async function verifySeed(): Promise<Result> {
   return {
     name: 'seed on real engine',
     ok: mismatches.length === 0,
-    detail: mismatches.join(', ') || `${Object.keys(FIXTURES).length} tables, ${total} rows verified`,
+    detail:
+      mismatches.join(', ') ||
+      `${Object.keys(FIXTURES).length} tables, ${total} rows verified`,
   }
 }
 
@@ -58,25 +114,48 @@ async function verifyMigration(): Promise<Result> {
   const v1 = new Dexie(name)
   v1.version(1).stores(V1_SCHEMA)
   await v1.open()
-  await v1.table('profiles').put({
-    id: 'legacy-profile-000',
-    name: 'Legacy User',
-    createdAt: 1,
-    updatedAt: 2,
-  })
+  for (const [table, row] of Object.entries(LEGACY_ROWS)) {
+    await v1.table(table).put(row)
+  }
   await v1.close()
 
-  // Reopen with the current definition: the upgrade must run and the
-  // legacy row must come through with the units default stamped.
+  // Reopen with the current definition: the upgrade must run, every
+  // legacy row must survive, and the units default must be stamped.
   const current = new TsfDb(name)
   await current.open()
+  const problems: string[] = []
+  if (current.verno !== 2) problems.push(`verno=${current.verno}`)
+  for (const [table, row] of Object.entries(LEGACY_ROWS)) {
+    const readBack = await current.table(table).get(row.id)
+    if (!readBack) problems.push(`${table}: lost row`)
+  }
   const p = await current.profiles.get('legacy-profile-000')
-  const detail = `verno=${current.verno}, units=${p?.units ?? 'missing'}, name=${p?.name ?? 'missing'}`
-  const ok =
-    current.verno === 2 && p?.units === 'kg' && p?.name === 'Legacy User'
+  if (p?.units !== 'kg' || p?.name !== 'Legacy User') {
+    problems.push(`profiles upgrade: units=${p?.units}, name=${p?.name}`)
+  }
+  // All three v2 indexes usable on the real engine.
+  const byMuscle = await current.exercises
+    .where('muscleGroups')
+    .equals('chest')
+    .count()
+  if (byMuscle !== 1) problems.push(`muscleGroups index: ${byMuscle}`)
+  const byBarcode = await current.foods
+    .where('barcode')
+    .equals('4006381333931')
+    .count()
+  if (byBarcode !== 1) problems.push(`barcode index: ${byBarcode}`)
+  const compound = await current.sets
+    .where('[sessionId+exerciseId]')
+    .equals(['legacy-session-000', 'legacy-exercise-000'])
+    .count()
+  if (compound !== 1) problems.push(`compound index: ${compound}`)
   await current.close()
   await deleteDatabase(name)
-  return { name: 'v1→v2 migration on real engine', ok, detail }
+  return {
+    name: 'v1→v2 migration on real engine (7 tables, 3 indexes)',
+    ok: problems.length === 0,
+    detail: problems.join(', ') || 'all legacy rows intact, units stamped, indexes usable',
+  }
 }
 
 async function run(): Promise<void> {
