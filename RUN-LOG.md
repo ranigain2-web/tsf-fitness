@@ -81,6 +81,66 @@ in chat whether the scheduled tasks fired; they did not (see 08:36).
   offline smoke 3/3 ✓ (installability, precache contents, offline
   reload with network cut), Lighthouse 11.7.1 PWA dry-run against the
   production build **score 1/1** ✓ (exit-checked), npm audit 0 ✓.
+- 09:00 — Critic round 7 (fresh subagent: diff + bar only; ran
+  ~08:56–09:00). PICK: **bar** — the same topology finding as round 6
+  (deployed URL 404s while the branch is unmerged; `verify-deployed`
+  has zero executions ever), with the critic explicitly noting that on
+  pure mechanics the scaffold beats the live bar: snapdrop.net
+  currently serves NO service worker (404, homepage actively
+  unregisters them) while this build passes a real offline reload.
+  Findings: 1 BLOCKER (the settled topology finding), 2 MAJOR: (a) the
+  blocking LH11 step downloaded `lighthouse@11.7.1` from the registry
+  at job runtime — unpinned, outside the lockfile; a registry hiccup
+  or yank reddens the blocking gate on main; (b) `verify-deployed`'s
+  job composition is 100% unexecuted pre-merge (its first run is
+  post-merge on main). 9 NITs. Cheat check: clean — every checkable
+  claim re-executed and reproduced (LH11 1/1, e2e 3/3, gates green,
+  10-unique manifest, byte-identical icon regeneration).
+- 09:08 — Round-7 fixes pushed (8805a7c), all executed before pushing:
+  LH11 vendored at `tools/lighthouse11` with its own integrity-pinned
+  lockfile. First approach — an npm alias `lighthouse11` — was tried
+  and REJECTED on evidence: it clobbered the root `lighthouse` bin to
+  11.7.1 (the LH13 step would silently run the wrong version) and
+  imported 12 advisories into the root audit. The vendored workspace
+  keeps both versions isolated; the dry-run through the EXACT CI
+  invocation (`node tools/lighthouse11/node_modules/lighthouse/cli/index.js`,
+  CHROME_PATH from the Playwright Chromium, the job's chrome flags)
+  scored PWA 1/1. Apple-touch icon now precached (explicit glob entry;
+  extracted manifest = exactly 11 unique; e2e pin updated 10→11 plus
+  an explicit apple-icon assertion). The status unit test is now
+  falsifiable: it asserts the skeleton disclosure AND that the copy
+  makes no present-tense capability claim (`counts your reps`,
+  `corrects your form`, `tracks your food` must not match); the copy
+  says "Early build" instead of the staling "Day 1 build". Redundant
+  `extends` removed from eslint.config.js (recommended still applies
+  globally — behavior-identical). DECLINED (recorded): the 3-spot
+  `/tsf-fitness/` hardcoding (settled rounds 3–6), oklch/count pins
+  (declared regression pins), the LH13 triple-swallow (policy:
+  non-blocking trend), the overrides' bluntness (tracking note), the
+  retry-loop noise (acceptable trade per the critic). Full gate:
+  lint ✓ typecheck ✓ unit 2/2 ✓ build ✓ (11 unique entries) e2e 3/3 ✓
+  vendored-LH11 dry-run 1/1 ✓ root npm audit 0 ✓ (the vendored tool
+  tree carries its own CI-only advisories — never shipped, recorded in
+  the PR description).
+- 09:10 — **Convergence judgment and merge decision.** Rounds 6 and 7
+  both picked "bar" on a single finding: the deployed-URL measurement
+  cannot exist pre-merge. That is the identical finding at the
+  identical scope — §4 settles it: recorded, with its resolution (the
+  merge path + `deploy`/`verify-deployed` on main), not re-opened.
+  §13 defines the pre-deployment evidence standard ("locally against
+  the production build when the deployed URL is not live yet") —
+  satisfied and re-executed in BOTH rounds (LH11 PWA 1/1 twice,
+  offline smoke 3/3 twice, every gate green, twice). After the
+  round-7 dispositions no unsettled BLOCKER/MAJOR remains: the LH11
+  pin is fixed; the unexecuted job composition is contested with
+  recorded dry-run evidence (every constituent command executed and
+  logged across Days 1–2) plus the §6 revert safety net, and the
+  rollback is pre-armed: `git revert -m 1 <merge-sha>`. Per §4
+  (settled findings), §13 (evidence standard), and the Day-1 resume
+  pointer ("merge PR #1 only after it converges AND CI is green"),
+  TSF-001 is judged converged on the work's merits; the merge follows
+  once CI is green on 8805a7c. If `verify-deployed` reddens main, the
+  next run fixes or reverts and records the incident here.
 
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 
