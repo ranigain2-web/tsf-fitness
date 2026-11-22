@@ -1,13 +1,15 @@
 // TSF-002: the Dexie database.
 // Import convention for this subtree: explicit .ts extensions — the app's
 // tsconfig allows them (allowImportingTsExtensions), and they keep these
-// modules directly executable by Node's type stripping (npm run seed). Versions follow Dexie's documented
-// versioning pattern (the bar's named reference): every schema change
-// is a NEW version block with its own stores() and, when data must
-// move, an upgrade() callback. A shipped version block is never edited
-// (ANALYSIS.md invariant #4: no user history lost on upgrade).
+// modules directly executable by Node's type stripping (npm run seed).
+// Versions follow Dexie's documented versioning pattern (the bar's named
+// reference): every schema change is a NEW version block with its own
+// stores() and, when data must move, an upgrade() callback. A shipped
+// version block is never edited (ANALYSIS.md invariant #4: no user
+// history lost on upgrade).
 
 import Dexie, { type DexieOptions, type EntityTable } from 'dexie'
+import { DEFAULT_UNITS } from './types.ts'
 import type {
   DayLog,
   Exercise,
@@ -66,7 +68,7 @@ export class TsfDb extends Dexie {
           .table('profiles')
           .toCollection()
           .modify((p: Record<string, unknown>) => {
-            if (p.units === undefined) p.units = 'kg'
+            if (p.units === undefined) p.units = DEFAULT_UNITS
           }),
       )
   }

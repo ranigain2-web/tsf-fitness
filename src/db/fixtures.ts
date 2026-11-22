@@ -12,14 +12,15 @@ import type {
   Routine,
   WorkoutSession,
   WorkoutSet,
-} from './types'
+} from './types.ts'
+import { DEFAULT_UNITS } from './types.ts'
 
 const T = (h: number, m = 0) => Date.UTC(2026, 10, 22, h, m) // 2026-11-22, fixed
 
 export const PROFILE: Profile = {
   id: '0a000000-0000-4000-8000-000000000001',
   name: 'Alex',
-  units: 'kg',
+  units: DEFAULT_UNITS,
   createdAt: T(3),
   updatedAt: T(3),
 }

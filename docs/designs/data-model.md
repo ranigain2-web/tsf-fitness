@@ -23,8 +23,11 @@ for every entity; a migration test that seeds a v1 database and rolls
 it forward to current, green in CI.
 
 **Non-Goals:** UI for any entity (D3–D6), the exercise import (D3),
-nutrition search (D15), sync (D25 — but the model must not preclude it),
-and any query helper without a test that needs it.
+nutrition search (D15), sync (D25 — the model must not preclude it:
+UUID keys are the part that cannot be retrofitted without re-keying;
+last-write-wins `updatedAt` timestamps on all entities arrive as a
+versioned migration, v3, when D25 nears), and any query helper without
+a test that needs it.
 
 ## Technical Plan
 
@@ -62,6 +65,10 @@ names it — YAGNI fence):
 | WorkoutSet | id, sessionId, exerciseId, order, reps, weightKg\|null, rpe\|null, done, doneAt\|null | sessionId, exerciseId, [sessionId+exerciseId] |
 | Food | id, name, brand\|null, barcode\|null, per100g {kcal, protein, carb, fat}, source | name, barcode |
 | DayLog | id = date 'YYYY-MM-DD', entries[{foodId, grams, meal}], updatedAt | (primary key only) |
+
+Storage rule: weights are ALWAYS stored in kg (`weightKg`); the UI
+converts for display per `Profile.units`. The storage layer never
+converts.
 
 ## Alternatives Considered
 
@@ -113,7 +120,9 @@ names it — YAGNI fence):
 | `src/db/db.ts` | Database name, `.version(1)` baseline stores, `.version(2)` current (adds `*muscleGroups`, `barcode`, compound set index) with the units-stamping upgrade callback; exported typed table helpers. |
 | `src/db/fixtures.ts` | Deterministic seed fixtures: one profile, a handful of exercises/foods, a routine, a session with sets, a day log. |
 | `scripts/seed.ts` | `npm run seed`: open the db, bulk-put fixtures, print per-table counts; idempotent (put, not add). |
-| `src/db/db.test.ts` | Per-entity round-trip tests (write → read → deep-equal) against a fresh fake-indexeddb factory; the v1→v2 migration test: build a v1-only Dexie, seed, close, open the current db on the same factory, assert the upgrade ran (units stamped, data intact). |
+| `src/db/db.test.ts` | Per-entity round-trip tests (write → read → deep-equal, order-independent) against a fresh fake-indexeddb factory, a fixtures-cover-every-table guard, a frozen-literal check on the shipped v1 block, and the v1→v2 migration test (one legacy row per table, all intact, new indexes usable, verno asserted). |
+| `db-e2e.html` + `src/db/e2e-page.ts` | Button-gated verification page shipped at `/db-e2e.html` (added at critic round 1): runs seedDatabase and the v1→v2 migration against the browser's REAL IndexedDB; deletes its own test databases. Excluded from the offline precache (globIgnores) — tooling, not app shell. |
+| `e2e/db.e2e.spec.ts` | Playwright drives the verification page in real Chromium — engine-level key ordering, structured clone, and upgrade mechanics that fake-indexeddb cannot prove. |
 | `ANALYSIS.md` | Module map: record the data layer and its invariants (UUIDs, versioned migrations only). |
 
 No code in this note; schemas and field tables only. Registered in

@@ -4,6 +4,10 @@
 // docs/designs/data-model.md).
 
 export type Units = 'kg' | 'lb'
+
+/** The units default: stamped by the v1→v2 migration onto legacy rows
+ * and used by the seed fixtures. Single source for both. */
+export const DEFAULT_UNITS: Units = 'kg'
 export type ExerciseSource = 'builtin' | 'import' | 'custom'
 export type FoodSource = 'custom' | 'off'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -53,6 +57,8 @@ export interface WorkoutSet {
   exerciseId: string
   order: number
   reps: number
+  // ALWAYS stored in kg — the storage layer never converts; the UI
+  // converts for display per Profile.units (rule in data-model.md).
   weightKg: number | null
   rpe: number | null
   done: boolean
