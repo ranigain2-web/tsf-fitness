@@ -13,9 +13,11 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "lint": "eslint . --max-warnings 0",
-    "e2e": "npm run build && playwright test"
+    "e2e": "npm run build && playwright test",
+    "seed": "node --experimental-strip-types scripts/seed.ts"
   },
   "dependencies": {
+    "dexie": "^4.4.7",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
@@ -31,6 +33,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^10.15.0",
     "eslint-plugin-react-hooks": "^7.1.1",
+    "fake-indexeddb": "^6.2.8",
     "globals": "^17.14.0",
     "jsdom": "^31.0.1",
     "lighthouse": "13.6.0",

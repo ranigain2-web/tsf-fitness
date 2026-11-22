@@ -6,7 +6,8 @@ Link, Date, Author, Components, Description.
 
 | Link | Date | Author | Components | Description |
 |---|---|---|---|---|
-| — | — | — | — | No designs yet. First expected: `data-model.md` (TSF-002, Day 2) and `camera-pipeline.md` (TSF-008, Day 8). |
+| [data-model.md](data-model.md) | 2026-11-22 | Day-2 run (manual cycle) | `src/db/*`, `scripts/seed.ts` | Dexie schema: 7 tables, UUID keys, versions 1→2 with upgrade; seed fixtures; round-trip + migration tests. Alternatives weighed: key strategy, set normalization, DayLog embedding, migration tooling, test DB, seed runner. |
+| `camera-pipeline.md` | — expected Day 8 (TSF-008) | — | — | — |
 
 ## Design doc shape (keep it short and plain)
 

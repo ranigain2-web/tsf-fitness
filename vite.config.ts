@@ -10,6 +10,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 // the manifest's own URL — correct on any subpath without hardcoding.
 export default defineConfig({
   base: '/tsf-fitness/',
+  // Second entry: the button-gated data-layer verification page
+  // (real-IndexedDB checks driven by e2e/db.e2e.spec.ts). It ships but
+  // is excluded from the offline precache (globIgnores below).
+  build: {
+    rollupOptions: {
+      input: { main: 'index.html', 'db-e2e': 'db-e2e.html' },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
@@ -52,6 +60,9 @@ export default defineConfig({
         // is not manifest-injected either, so it gets an explicit entry —
         // an offline iOS add-to-home-screen needs it from the precache.
         globPatterns: ['**/*.{js,css,html,svg}', 'icons/icon-apple-180.png'],
+        // The verification page is tooling, not app shell: it loads
+        // online-only and must not bloat the offline precache.
+        globIgnores: ['db-e2e.html', 'assets/db-e2e*'],
       },
     }),
   ],

@@ -79,11 +79,14 @@ test('service worker precaches the shell', async ({ page }) => {
 
   const paths = await precachePaths(page)
   // The generated Workbox worker precaches everything the shell needs
-  // offline — exactly 11 unique URLs for this shell: HTML, webmanifest,
-  // favicon, 5 icons (4 manifest + apple-touch), 2 JS bundles, 1 CSS.
+  // offline — exactly 12 unique URLs for this shell: HTML, webmanifest,
+  // favicon, 5 icons (4 manifest + apple-touch), 3 JS chunks (main +
+  // workbox-window + the modulepreload polyfill, split out when the
+  // db-e2e verification entry made the build multi-page), 1 CSS.
   // Pinned exactly: precache bloat and loss both matter, so drift in
-  // either direction fails here.
-  expect(paths.length).toBe(11)
+  // either direction fails here. (The db-e2e page and its dexie chunk
+  // are deliberately NOT precached — globIgnores; tooling, not shell.)
+  expect(paths.length).toBe(12)
   expect(paths).toContain('/tsf-fitness/index.html')
   expect(paths).toContain('/tsf-fitness/manifest.webmanifest')
   expect(paths.some((p) => p.includes('/assets/') && p.endsWith('.js'))).toBe(true)

@@ -72,5 +72,10 @@ is only an optional relay the user may choose to run.
 ## Module map
 
 Grows as the codebase grows. Day 0: only the framework exists; Day 1 adds
-the client scaffold and the real CI. (The weekly drift audit verifies this
-section against the actual tree.)
+the client scaffold and the real CI; Day 2 adds the Dexie data layer
+(`src/db/`: typed entities, versions 1→2 with the units-stamping upgrade,
+deterministic fixtures, round-trip + migration tests on fake-indexeddb).
+Data-layer invariants: UUID primary keys generated at creation (sync-safe
+for D25), every schema change is a new Dexie version with an upgrade path —
+never an edit to a shipped version block (invariant 4). (The weekly drift
+audit verifies this section against the actual tree.)

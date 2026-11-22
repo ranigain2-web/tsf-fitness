@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="TSF Fitness data layer verification page." />
+    <title>TSF Fitness — data layer verification</title>
+  </head>
+  <body>
+    <main>
+      <h1>Data layer verification</h1>
+      <p>
+        Runs the seed and the v1→v2 migration against this browser's real
+        IndexedDB. Button-gated: nothing runs until you click. Only its own
+        test databases are created, and they are deleted afterwards.
+      </p>
+      <button id="run" type="button">Run data verification</button>
+      <pre id="results" data-done="false"></pre>
+    </main>
+    <script type="module" src="/src/db/e2e-page.ts"></script>
+  </body>
+</html>

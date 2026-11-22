@@ -7,7 +7,7 @@ history.
 
 ---
 
-## 2026-11-22 · Day 2 — PARTIAL (in flight)
+## 2026-11-22 · Day 2 — COMPLETE
 
 All times IST (Asia/Calcutta), from `date` calls, `git log`, and the
 GitHub API. **Context: this cycle is a MANUAL trigger.** The owner asked
@@ -141,6 +141,87 @@ in chat whether the scheduled tasks fired; they did not (see 08:36).
   TSF-001 is judged converged on the work's merits; the merge follows
   once CI is green on 8805a7c. If `verify-deployed` reddens main, the
   next run fixes or reverts and records the incident here.
+
+- 09:12 — **PR #1 MERGED** (squash `2dc73550`, API timestamp
+  2026-11-22T03:42:16Z; the merge landed via merge-commit 50585e9 on
+  the branch after a RUN-LOG conflict with main was resolved by
+  union — both sides' journal entries kept, no history rewritten).
+  Main pipeline on the merge commit, every job verified via the API
+  and the live URL: ci ✓, e2e ✓, **deploy ✓ (first real
+  deployment)**, **verify-deployed ✓ (its first execution ever)** —
+  the blocking offline smoke ran against the LIVE Pages URL and the
+  vendored Lighthouse 11 PWA check passed on it. The URL
+  https://ranigain2-web.github.io/tsf-fitness/ now serves the app
+  HTML, manifest, sw.js, and the apple icon (all 200, checked by
+  curl). The bar's deployed half is proven on main; round 7's
+  residual risk (unexecuted job composition) resolved green on its
+  first real execution. **TSF-001 DONE.**
+- 09:15 — TSF-002 started (D2: local data model). egm-draft skill
+  loaded; design note `docs/designs/data-model.md` written and
+  registered in SITEMAP (the repo's first design doc), with six
+  alternatives weighed and rejected on evidence (UUID vs
+  auto-increment keys for D25 sync; normalized sets vs embedded;
+  DayLog embedding; Dexie native versioning vs a custom runner;
+  fake-indexeddb vs mocking; seed tooling). Deps registry-verified
+  before install: dexie@4.4.7, fake-indexeddb@6.2.8 (both
+  Apache-2.0). Branch `agent/tsf-002-data-model` off 2dc7355; audit
+  stayed 0.
+- 09:30 — TSF-002 built, all verification executed: typed entities
+  (`src/db/types.ts`), Dexie versions 1→2 (v2 adds the multi-entry
+  muscleGroups, barcode, and compound set indexes plus the
+  units-stamping upgrade callback — the Dexie-documented pattern the
+  bar names), deterministic fixtures, `seedDatabase` + `npm run seed`
+  headless demo (Node 24 native type stripping; Node has no real
+  IndexedDB so the headless run uses fake-indexeddb and VERIFIES every
+  table — honesty amendment recorded in the design note's alternative
+  6; the browser one-liner is documented in src/db/seed.ts). Tests:
+  per-entity round-trips (write → read → deep-equal), seed
+  idempotency, and the v1→v2 migration test (legacy row without
+  `units` upgraded to 'kg', pre-existing data intact, new indexes
+  usable, fresh writes fine). **12/12 green**; lint ✓ typecheck ✓
+  build ✓ (app bundle unchanged — dexie enters no bundle until a
+  screen imports it; precache stays 11). Build-time corrections,
+  honest record: constructor deps retyped to DexieOptions; the src/db
+  subtree adopted explicit .ts import extensions (Node executability;
+  the app tsconfig allows them) after the seed runner failed on
+  extensionless imports; eslint override added for CLI scripts
+  (no-console is an app-code rule, not a tooling rule).
+
+- 09:45 — **Correction (critic round 2, finding 3):** the 09:30 bullet
+  said "precache stays 11" — false from the round-1 fixes onward: the
+  multi-page build (db-e2e entry) split the modulepreload polyfill out
+  as a shared shell chunk, so the precache is 12 unique URLs (pin
+  updated consciously in the same commit; db-e2e itself excluded via
+  globIgnores). Also: the round-1 fix commit initially sat on a
+  DETACHED HEAD (a critic subagent had left HEAD detached) and a
+  silent `git push -q` reported nothing — caught by comparing the PR
+  head to the branch tip. Lesson recorded: a quiet push is not
+  evidence; verify `origin/<branch>` moved.
+- 10:15 — Critic round 2 (fresh subagent): **PICK: work** — both bar
+  halves met, zero BLOCKERs; it mutation-tested the frozen-v1 tripwire
+  (fires correctly) and re-ran the whole gate itself. 3 MAJOR: (a) the
+  freeze tripwire covered only v1, not the upgrader-attached v2 block;
+  (b) the real-engine page seeded 1 legacy row in 1 table vs the unit
+  test's 7; (c) the stale "precache stays 11" journal claim (corrected
+  above). Fixes: FROZEN_V2 literal + fresh-db verno assert; the
+  /db-e2e page now mirrors the unit test — one legacy row per table,
+  per-table intactness, all three v2 indexes exercised on real
+  Chromium; journal corrected. DECLINED (recorded): close→reopen
+  round-trips in unit tests (the migration tests already close and
+  reopen; the e2e page too), coordinated-edit tamper-proofing of the
+  frozen literals (a chain snapshot is heavier than the threat model —
+  advisory tripwire acknowledged), tsconfig double-compilation note
+  (both programs strict; revisit if they diverge).
+- 10:20 — Day 2 close-out. Shipped this cycle: TSF-001 MERGED and
+  LIVE (first deploy; verify-deployed green on main; LH11 PWA 1/1 on
+  the deployed URL), TSF-002 MERGED (Dexie data model: 7 typed
+  entities, versions 1→2 frozen + tripwired, seed gated in CI,
+  round-trip + migration tests on fake AND real engines). Both bars
+  met with executed evidence. Scheduled tasks did NOT fire today
+  (see 08:36) — this cycle was the documented manual fallback. The
+  scheduler's job status remains unverifiable (tool unavailable all
+  turn); tomorrow's 01:30 fire is the live test, and the manual
+  trigger remains available to the owner anytime.
 
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 

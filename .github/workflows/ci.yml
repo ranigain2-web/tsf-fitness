@@ -34,6 +34,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - run: npm run seed
 
   e2e:
     concurrency:
