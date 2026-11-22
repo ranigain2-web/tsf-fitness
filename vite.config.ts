@@ -44,7 +44,12 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: 'index.html',
-        globPatterns: ['**/*.{js,css,html,webmanifest,png,svg}'],
+        // The plugin auto-injects the manifest and the manifest icons into
+        // the precache; globbing webmanifest/png on top of that duplicates
+        // them in the generated manifest (the runtime cache dedupes, but
+        // the shipped artifact must be clean). svg stays: favicon.svg is a
+        // public/ asset the plugin does not inject.
+        globPatterns: ['**/*.{js,css,html,svg}'],
       },
     }),
   ],

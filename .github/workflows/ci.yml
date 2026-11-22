@@ -52,7 +52,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: test-results
           path: test-results/
           retention-days: 7
 
@@ -131,7 +131,7 @@ jobs:
         # swallowed.
         continue-on-error: true
         run: |
-          mkdir -p lighthouse-report
+          mkdir -p /tmp/lighthouse lighthouse-report
           npx lighthouse "$E2E_BASE_URL" \
             --chrome-flags="--headless=new --no-sandbox --remote-allow-origins=*" \
             --output=json --output=html \

@@ -52,6 +52,13 @@ def main() -> None:
 
     make_icon(192, rounded=True, safe_zone=0.72).save(os.path.join(out, "icon-192.png"))
     make_icon(512, rounded=True, safe_zone=0.72).save(os.path.join(out, "icon-512.png"))
+    # Apple touch icon: square and fully OPAQUE — iOS composites black
+    # behind transparent corners, so the rounded transparent variants are
+    # wrong for this slot. 180px is the conventional apple-touch-icon
+    # size; iOS applies its own corner mask at render time.
+    make_icon(180, rounded=False, safe_zone=0.72).save(
+        os.path.join(out, "icon-apple-180.png")
+    )
     # Maskable: full-bleed square, content inside the 80% safe zone.
     make_icon(192, rounded=False, safe_zone=0.60).save(
         os.path.join(out, "icon-maskable-192.png")
