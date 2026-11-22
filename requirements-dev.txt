@@ -1,0 +1,3 @@
+# Dev-only Python dependencies, used by scripts/gen_icons.py (PWA icon
+# generation). The app itself is pure Node; nothing here ships.
+pillow>=11.3

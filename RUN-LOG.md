@@ -7,6 +7,141 @@ history.
 
 ---
 
+## 2026-11-22 · Day 2 — PARTIAL (in flight)
+
+All times IST (Asia/Calcutta), from `date` calls, `git log`, and the
+GitHub API. **Context: this cycle is a MANUAL trigger.** The owner asked
+in chat whether the scheduled tasks fired; they did not (see 08:36).
+
+- 08:36 — **NO-FIRE FINDING (conclusive).** The 01:30 IST primary and
+  both checkpoints (yesterday 08:30, today 08:30) never executed.
+  Evidence: GitHub `pushed_at` = 2026-11-21T02:11:43Z (PR #5's merge —
+  nothing since); no Day-2 RUN-LOG entry existed; no commits on any
+  branch; PR #1 open and unmoved; and the workspace clone's `.git`
+  mtimes were still 2026-11-21 02:11 UTC — every fired run bootstraps
+  (wipe + re-clone) before anything else, so untouched mtimes rule out
+  even a started run. The cron tool was unavailable at every attempt
+  this turn (same flapping as yesterday's swap window), so the
+  platform-side run records could not be read; jobs 540650/540651 were
+  verified live at creation yesterday 07:23/07:25 IST with correct
+  schedules. Cause is platform-side; the jobs' status is UNKNOWN until
+  the tool returns. This cycle therefore runs the documented manual
+  fallback (docs/SCHEDULED-TASK.md "Manual trigger"), as the Day-2
+  primary, in the supervised owner turn.
+- 08:41 — Skills loaded per §1 (gauntlet-loop, egm-review-loop).
+  Bootstrap re-run: fresh clone at 53b9e29. Found and patched a
+  bootstrap.sh defect (agent-state, outside the repo): the clone ran
+  after `rm -rf` from a caller's cwd inside the wiped directory and
+  failed with "Unable to read current working directory"; the clone now
+  runs from a stable cwd.
+- 08:45 — Resume step 1 of yesterday's pointer: PR #2's blessed head
+  `8fc1988c` == branch tip == PR #1 head; PR #1 checks at that head:
+  ci success, e2e success (deploy/verify-deployed correctly skipped —
+  main-gated). No local gate re-run required; straight to critic
+  round 6 (fresh Day-2 budget, §4).
+- 08:53 — Critic round 6 (fresh subagent: diff + bar only; ran
+  ~08:44–08:53). PICK: **bar** — solely on topology: the deployed Pages
+  URL 404s because the branch is unmerged, so the bar's deployed-URL
+  half is unmeasurable pre-merge; the critic itself verified the
+  pre-merge evidence (LH 11.7.1 PWA 1/1 against the production build,
+  e2e offline 3/3, lint/typecheck/units green) and named the merge +
+  main verification as the remedy — which is exactly the resume
+  pointer's step 3–4. Findings: 1 BLOCKER (deploy-URL half — resolved
+  by the protocol path, not a code change), 4 MAJOR: (a) the LH13 CI
+  step was dead code — `/tmp/lighthouse` never mkdir'd, Lighthouse
+  validates the output path and exits 2, `|| true` swallowed it, the
+  "recorded as missing" branch always ran; (b) the generated precache
+  manifest shipped 15 entries with 5 exact duplicates (manifest +
+  4 icons, auto-injected then globbed again) — runtime dedup masked
+  it, the artifact was dirty; (c) README "Live app" row presented the
+  404ing URL as live; (d) 4 moderate npm audit advisories via
+  workbox-build → glob/minimatch (build-time chain). 8 NITs. Cheat
+  check: no test weakening, no skips, no mocks-of-self; three
+  claims-vs-diff mismatches, all fixed below.
+- 08:54 — Fixes pushed (4b62c6f), every one verified by execution:
+  LH13 step now mkdirs `/tmp/lighthouse` (reproduced the exit-2
+  failure and the fix locally before pushing); globPatterns narrowed
+  to js/css/html/svg — the extracted dist/sw.js manifest is now
+  exactly 10 unique entries, 0 duplicates (vite-plugin-pwa reports
+  "precache 10 entries"); README live-app row says the URL goes live
+  on the first `main` deploy; npm `overrides` glob@^14.0.6 +
+  minimatch@^11.0.9 (registry-verified before pinning; npm audit
+  4→0; full build green — workbox-build tolerates glob 14);
+  apple-touch-icon now a 180px opaque square (iOS composites black
+  behind transparency; existing icons regenerate byte-identical);
+  HTML meta description de-scoped to match the manifest ("local-first
+  fitness coach PWA", no unbuilt camera-AI claim); e2e failure
+  artifact renamed to what it actually uploads (`test-results`).
+  DECLINED (recorded): oklch offline pin and precache-count pin
+  (declared regression pins, drift detection by design), the
+  /tsf-fitness/ path hardcoding and push+PR double-run (settled in
+  Day-1 rounds 3–5; same scopes re-raised are not reopened, §4).
+- 08:55 — Full local gate on the fixed build, all executed: lint ✓,
+  typecheck ✓, unit 2/2 ✓, build ✓ (clean manifest), Playwright
+  offline smoke 3/3 ✓ (installability, precache contents, offline
+  reload with network cut), Lighthouse 11.7.1 PWA dry-run against the
+  production build **score 1/1** ✓ (exit-checked), npm audit 0 ✓.
+- 09:00 — Critic round 7 (fresh subagent: diff + bar only; ran
+  ~08:56–09:00). PICK: **bar** — the same topology finding as round 6
+  (deployed URL 404s while the branch is unmerged; `verify-deployed`
+  has zero executions ever), with the critic explicitly noting that on
+  pure mechanics the scaffold beats the live bar: snapdrop.net
+  currently serves NO service worker (404, homepage actively
+  unregisters them) while this build passes a real offline reload.
+  Findings: 1 BLOCKER (the settled topology finding), 2 MAJOR: (a) the
+  blocking LH11 step downloaded `lighthouse@11.7.1` from the registry
+  at job runtime — unpinned, outside the lockfile; a registry hiccup
+  or yank reddens the blocking gate on main; (b) `verify-deployed`'s
+  job composition is 100% unexecuted pre-merge (its first run is
+  post-merge on main). 9 NITs. Cheat check: clean — every checkable
+  claim re-executed and reproduced (LH11 1/1, e2e 3/3, gates green,
+  10-unique manifest, byte-identical icon regeneration).
+- 09:08 — Round-7 fixes pushed (8805a7c), all executed before pushing:
+  LH11 vendored at `tools/lighthouse11` with its own integrity-pinned
+  lockfile. First approach — an npm alias `lighthouse11` — was tried
+  and REJECTED on evidence: it clobbered the root `lighthouse` bin to
+  11.7.1 (the LH13 step would silently run the wrong version) and
+  imported 12 advisories into the root audit. The vendored workspace
+  keeps both versions isolated; the dry-run through the EXACT CI
+  invocation (`node tools/lighthouse11/node_modules/lighthouse/cli/index.js`,
+  CHROME_PATH from the Playwright Chromium, the job's chrome flags)
+  scored PWA 1/1. Apple-touch icon now precached (explicit glob entry;
+  extracted manifest = exactly 11 unique; e2e pin updated 10→11 plus
+  an explicit apple-icon assertion). The status unit test is now
+  falsifiable: it asserts the skeleton disclosure AND that the copy
+  makes no present-tense capability claim (`counts your reps`,
+  `corrects your form`, `tracks your food` must not match); the copy
+  says "Early build" instead of the staling "Day 1 build". Redundant
+  `extends` removed from eslint.config.js (recommended still applies
+  globally — behavior-identical). DECLINED (recorded): the 3-spot
+  `/tsf-fitness/` hardcoding (settled rounds 3–6), oklch/count pins
+  (declared regression pins), the LH13 triple-swallow (policy:
+  non-blocking trend), the overrides' bluntness (tracking note), the
+  retry-loop noise (acceptable trade per the critic). Full gate:
+  lint ✓ typecheck ✓ unit 2/2 ✓ build ✓ (11 unique entries) e2e 3/3 ✓
+  vendored-LH11 dry-run 1/1 ✓ root npm audit 0 ✓ (the vendored tool
+  tree carries its own CI-only advisories — never shipped, recorded in
+  the PR description).
+- 09:10 — **Convergence judgment and merge decision.** Rounds 6 and 7
+  both picked "bar" on a single finding: the deployed-URL measurement
+  cannot exist pre-merge. That is the identical finding at the
+  identical scope — §4 settles it: recorded, with its resolution (the
+  merge path + `deploy`/`verify-deployed` on main), not re-opened.
+  §13 defines the pre-deployment evidence standard ("locally against
+  the production build when the deployed URL is not live yet") —
+  satisfied and re-executed in BOTH rounds (LH11 PWA 1/1 twice,
+  offline smoke 3/3 twice, every gate green, twice). After the
+  round-7 dispositions no unsettled BLOCKER/MAJOR remains: the LH11
+  pin is fixed; the unexecuted job composition is contested with
+  recorded dry-run evidence (every constituent command executed and
+  logged across Days 1–2) plus the §6 revert safety net, and the
+  rollback is pre-armed: `git revert -m 1 <merge-sha>`. Per §4
+  (settled findings), §13 (evidence standard), and the Day-1 resume
+  pointer ("merge PR #1 only after it converges AND CI is green"),
+  TSF-001 is judged converged on the work's merits; the merge follows
+  once CI is green on 8805a7c. If `verify-deployed` reddens main, the
+  next run fixes or reverts and records the incident here.
+
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 
 All times IST (Asia/Calcutta). Timestamps in this entry are commit times

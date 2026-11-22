@@ -16,9 +16,33 @@ critic. The full commit history is the build log.
 
 | | |
 |---|---|
-| Day | 0 of 30 (framework) — first autonomous run tonight 01:30 IST |
+| Day | 1 of 30 — walking skeleton (TSF-001) |
 | Current release | — (v0.1 expected Day 7) |
-| Next item | TSF-001: walking skeleton (Vite + React + TS PWA, CI, Pages deploy) |
+| Live app | https://ranigain2-web.github.io/tsf-fitness/ — deployed from `main` by CI, re-verified with a blocking offline smoke on every push (the URL goes live on the first `main` deploy) |
+
+## Development
+
+The app is a local-first PWA: once loaded, the shell (and later, all data
+and engines) works with the network off.
+
+```bash
+npm install        # install dependencies
+npm run dev        # dev server
+npm run build      # typecheck + production build (dist/)
+npm run preview    # serve the production build
+npm test           # Vitest unit tests
+npm run e2e        # Playwright offline smoke tests (builds first)
+npm run lint       # ESLint
+npm run typecheck  # tsc -b
+```
+
+Installability and offline behavior are enforced by CI: Playwright loads
+the production build, waits for the service worker to control the page,
+verifies the precache, then reloads with the network cut and asserts the
+shell still renders (styled, not just present).
+
+Icon regeneration (optional, dev-only): `pip install -r
+requirements-dev.txt && python3 scripts/gen_icons.py`.
 
 ## The operating framework
 
