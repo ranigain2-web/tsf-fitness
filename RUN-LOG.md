@@ -142,6 +142,51 @@ in chat whether the scheduled tasks fired; they did not (see 08:36).
   once CI is green on 8805a7c. If `verify-deployed` reddens main, the
   next run fixes or reverts and records the incident here.
 
+- 09:12 — **PR #1 MERGED** (squash `2dc73550`, API timestamp
+  2026-11-22T03:42:16Z; the merge landed via merge-commit 50585e9 on
+  the branch after a RUN-LOG conflict with main was resolved by
+  union — both sides' journal entries kept, no history rewritten).
+  Main pipeline on the merge commit, every job verified via the API
+  and the live URL: ci ✓, e2e ✓, **deploy ✓ (first real
+  deployment)**, **verify-deployed ✓ (its first execution ever)** —
+  the blocking offline smoke ran against the LIVE Pages URL and the
+  vendored Lighthouse 11 PWA check passed on it. The URL
+  https://ranigain2-web.github.io/tsf-fitness/ now serves the app
+  HTML, manifest, sw.js, and the apple icon (all 200, checked by
+  curl). The bar's deployed half is proven on main; round 7's
+  residual risk (unexecuted job composition) resolved green on its
+  first real execution. **TSF-001 DONE.**
+- 09:15 — TSF-002 started (D2: local data model). egm-draft skill
+  loaded; design note `docs/designs/data-model.md` written and
+  registered in SITEMAP (the repo's first design doc), with six
+  alternatives weighed and rejected on evidence (UUID vs
+  auto-increment keys for D25 sync; normalized sets vs embedded;
+  DayLog embedding; Dexie native versioning vs a custom runner;
+  fake-indexeddb vs mocking; seed tooling). Deps registry-verified
+  before install: dexie@4.4.7, fake-indexeddb@6.2.8 (both
+  Apache-2.0). Branch `agent/tsf-002-data-model` off 2dc7355; audit
+  stayed 0.
+- 09:30 — TSF-002 built, all verification executed: typed entities
+  (`src/db/types.ts`), Dexie versions 1→2 (v2 adds the multi-entry
+  muscleGroups, barcode, and compound set indexes plus the
+  units-stamping upgrade callback — the Dexie-documented pattern the
+  bar names), deterministic fixtures, `seedDatabase` + `npm run seed`
+  headless demo (Node 24 native type stripping; Node has no real
+  IndexedDB so the headless run uses fake-indexeddb and VERIFIES every
+  table — honesty amendment recorded in the design note's alternative
+  6; the browser one-liner is documented in src/db/seed.ts). Tests:
+  per-entity round-trips (write → read → deep-equal), seed
+  idempotency, and the v1→v2 migration test (legacy row without
+  `units` upgraded to 'kg', pre-existing data intact, new indexes
+  usable, fresh writes fine). **12/12 green**; lint ✓ typecheck ✓
+  build ✓ (app bundle unchanged — dexie enters no bundle until a
+  screen imports it; precache stays 11). Build-time corrections,
+  honest record: constructor deps retyped to DexieOptions; the src/db
+  subtree adopted explicit .ts import extensions (Node executability;
+  the app tsconfig allows them) after the seed runner failed on
+  extensionless imports; eslint override added for CLI scripts
+  (no-console is an app-code rule, not a tooling rule).
+
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 
 All times IST (Asia/Calcutta). Timestamps in this entry are commit times

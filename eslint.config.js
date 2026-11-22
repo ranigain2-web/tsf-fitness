@@ -26,4 +26,13 @@ export default tseslint.config(
       globals: { ...globals.node },
     },
   },
+  {
+    files: ['scripts/**/*.ts'],
+    // Node CLI scripts: console IS the interface. The no-console rule
+    // exists for app code (the local-first no-beacons invariant);
+    // headless tooling is not app code.
+    rules: {
+      'no-console': 'off',
+    },
+  },
 )
