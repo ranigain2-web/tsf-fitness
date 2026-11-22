@@ -48,8 +48,10 @@ export default defineConfig({
         // the precache; globbing webmanifest/png on top of that duplicates
         // them in the generated manifest (the runtime cache dedupes, but
         // the shipped artifact must be clean). svg stays: favicon.svg is a
-        // public/ asset the plugin does not inject.
-        globPatterns: ['**/*.{js,css,html,svg}'],
+        // public/ asset the plugin does not inject. The apple-touch icon
+        // is not manifest-injected either, so it gets an explicit entry —
+        // an offline iOS add-to-home-screen needs it from the precache.
+        globPatterns: ['**/*.{js,css,html,svg}', 'icons/icon-apple-180.png'],
       },
     }),
   ],

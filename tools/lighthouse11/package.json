@@ -1,0 +1,8 @@
+{
+  "name": "tsf-lighthouse11",
+  "private": true,
+  "description": "Vendored, lockfile-pinned Lighthouse 11.7.1 — the last release carrying the PWA category (removed in 12.0.0). CI-only tool for the bar's blocking installability measurement on the deployed URL; never shipped. Kept outside the root package.json so its bin cannot clobber lighthouse@13 and its advisory tree cannot enter the root audit.",
+  "dependencies": {
+    "lighthouse": "11.7.1"
+  }
+}

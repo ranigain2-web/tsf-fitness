@@ -12,6 +12,13 @@ describe('App shell', () => {
   it('states the current build status honestly', () => {
     render(<App />)
     const status = screen.getByTestId('build-status')
+    // Disclose the skeleton state...
     expect(status.textContent).toContain('walking skeleton')
+    // ...and never claim an unbuilt capability in the present tense —
+    // the honesty invariant the shell is built on (the camera coach and
+    // food log are future work, not shipped features).
+    expect(status.textContent).not.toMatch(
+      /counts (your )?reps|corrects (your )?form|tracks (your )?food/i,
+    )
   })
 })

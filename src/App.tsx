@@ -10,7 +10,7 @@ export default function App() {
           Train. Snap. Fuel.
         </p>
         <p className="mt-6 leading-relaxed text-slate-700 dark:text-slate-300" data-testid="build-status">
-          Day 1 build: walking skeleton — installable, offline-capable shell.
+          Early build: walking skeleton — installable, offline-capable shell.
           Camera coach, food log, and coach engines land over the next weeks.
         </p>
       </div>

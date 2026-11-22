@@ -151,9 +151,17 @@ jobs:
         # Lighthouse 11's printer does NOT mkdir the output directory, and
         # with a single --output plus an explicit --output-path it writes
         # to that exact raw path (no .report.json suffix is appended).
+        # The binary is vendored at tools/lighthouse11 — its own
+        # package-lock pins lighthouse@11.7.1 with integrity hashes, so
+        # the blocking path makes no unpinned registry download. (An npm
+        # alias was tried and rejected: it clobbers the root
+        # lighthouse@13 bin and imports its advisories into the root
+        # audit. The vendored tree's advisories are CI-only and never
+        # shipped; recorded in the PR.)
         run: |
+          npm ci --prefix tools/lighthouse11
           mkdir -p /tmp/lh11 lighthouse-report
-          npx --yes lighthouse@11.7.1 "$E2E_BASE_URL" \
+          node tools/lighthouse11/node_modules/lighthouse/cli/index.js "$E2E_BASE_URL" \
             --only-categories=pwa \
             --chrome-flags="--headless=new --no-sandbox --remote-allow-origins=*" \
             --output=json \

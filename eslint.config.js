@@ -20,7 +20,8 @@ export default tseslint.config(
   },
   {
     files: ['**/*.{js,mjs,cjs}'],
-    extends: [js.configs.recommended],
+    // js.configs.recommended already applies globally above; this block
+    // only adds the Node globals for plain-JS files.
     languageOptions: {
       globals: { ...globals.node },
     },
