@@ -7,6 +7,81 @@ history.
 
 ---
 
+## 2026-11-22 · Day 2 — PARTIAL (in flight)
+
+All times IST (Asia/Calcutta), from `date` calls, `git log`, and the
+GitHub API. **Context: this cycle is a MANUAL trigger.** The owner asked
+in chat whether the scheduled tasks fired; they did not (see 08:36).
+
+- 08:36 — **NO-FIRE FINDING (conclusive).** The 01:30 IST primary and
+  both checkpoints (yesterday 08:30, today 08:30) never executed.
+  Evidence: GitHub `pushed_at` = 2026-11-21T02:11:43Z (PR #5's merge —
+  nothing since); no Day-2 RUN-LOG entry existed; no commits on any
+  branch; PR #1 open and unmoved; and the workspace clone's `.git`
+  mtimes were still 2026-11-21 02:11 UTC — every fired run bootstraps
+  (wipe + re-clone) before anything else, so untouched mtimes rule out
+  even a started run. The cron tool was unavailable at every attempt
+  this turn (same flapping as yesterday's swap window), so the
+  platform-side run records could not be read; jobs 540650/540651 were
+  verified live at creation yesterday 07:23/07:25 IST with correct
+  schedules. Cause is platform-side; the jobs' status is UNKNOWN until
+  the tool returns. This cycle therefore runs the documented manual
+  fallback (docs/SCHEDULED-TASK.md "Manual trigger"), as the Day-2
+  primary, in the supervised owner turn.
+- 08:41 — Skills loaded per §1 (gauntlet-loop, egm-review-loop).
+  Bootstrap re-run: fresh clone at 53b9e29. Found and patched a
+  bootstrap.sh defect (agent-state, outside the repo): the clone ran
+  after `rm -rf` from a caller's cwd inside the wiped directory and
+  failed with "Unable to read current working directory"; the clone now
+  runs from a stable cwd.
+- 08:45 — Resume step 1 of yesterday's pointer: PR #2's blessed head
+  `8fc1988c` == branch tip == PR #1 head; PR #1 checks at that head:
+  ci success, e2e success (deploy/verify-deployed correctly skipped —
+  main-gated). No local gate re-run required; straight to critic
+  round 6 (fresh Day-2 budget, §4).
+- 08:53 — Critic round 6 (fresh subagent: diff + bar only; ran
+  ~08:44–08:53). PICK: **bar** — solely on topology: the deployed Pages
+  URL 404s because the branch is unmerged, so the bar's deployed-URL
+  half is unmeasurable pre-merge; the critic itself verified the
+  pre-merge evidence (LH 11.7.1 PWA 1/1 against the production build,
+  e2e offline 3/3, lint/typecheck/units green) and named the merge +
+  main verification as the remedy — which is exactly the resume
+  pointer's step 3–4. Findings: 1 BLOCKER (deploy-URL half — resolved
+  by the protocol path, not a code change), 4 MAJOR: (a) the LH13 CI
+  step was dead code — `/tmp/lighthouse` never mkdir'd, Lighthouse
+  validates the output path and exits 2, `|| true` swallowed it, the
+  "recorded as missing" branch always ran; (b) the generated precache
+  manifest shipped 15 entries with 5 exact duplicates (manifest +
+  4 icons, auto-injected then globbed again) — runtime dedup masked
+  it, the artifact was dirty; (c) README "Live app" row presented the
+  404ing URL as live; (d) 4 moderate npm audit advisories via
+  workbox-build → glob/minimatch (build-time chain). 8 NITs. Cheat
+  check: no test weakening, no skips, no mocks-of-self; three
+  claims-vs-diff mismatches, all fixed below.
+- 08:54 — Fixes pushed (4b62c6f), every one verified by execution:
+  LH13 step now mkdirs `/tmp/lighthouse` (reproduced the exit-2
+  failure and the fix locally before pushing); globPatterns narrowed
+  to js/css/html/svg — the extracted dist/sw.js manifest is now
+  exactly 10 unique entries, 0 duplicates (vite-plugin-pwa reports
+  "precache 10 entries"); README live-app row says the URL goes live
+  on the first `main` deploy; npm `overrides` glob@^14.0.6 +
+  minimatch@^11.0.9 (registry-verified before pinning; npm audit
+  4→0; full build green — workbox-build tolerates glob 14);
+  apple-touch-icon now a 180px opaque square (iOS composites black
+  behind transparency; existing icons regenerate byte-identical);
+  HTML meta description de-scoped to match the manifest ("local-first
+  fitness coach PWA", no unbuilt camera-AI claim); e2e failure
+  artifact renamed to what it actually uploads (`test-results`).
+  DECLINED (recorded): oklch offline pin and precache-count pin
+  (declared regression pins, drift detection by design), the
+  /tsf-fitness/ path hardcoding and push+PR double-run (settled in
+  Day-1 rounds 3–5; same scopes re-raised are not reopened, §4).
+- 08:55 — Full local gate on the fixed build, all executed: lint ✓,
+  typecheck ✓, unit 2/2 ✓, build ✓ (clean manifest), Playwright
+  offline smoke 3/3 ✓ (installability, precache contents, offline
+  reload with network cut), Lighthouse 11.7.1 PWA dry-run against the
+  production build **score 1/1** ✓ (exit-checked), npm audit 0 ✓.
+
 ## 2026-11-21 · Day 1 — PARTIAL (in flight)
 
 All times IST (Asia/Calcutta). Timestamps in this entry are commit times
